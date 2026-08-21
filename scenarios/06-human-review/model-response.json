@@ -1,0 +1,10 @@
+{
+  "sectionId": "section-risk-benefit",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "The treatment has a favorable risk-benefit profile.",
+      "chunkIds": ["chunk-benefit-001", "chunk-risk-001"]
+    }
+  ]
+}

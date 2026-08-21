@@ -1,0 +1,6 @@
+{
+  "provider": "gemini",
+  "status": "provider_timeout",
+  "latencyMs": 15000,
+  "message": "Preferred provider exceeded the configured latency budget before returning a usable response."
+}

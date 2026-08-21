@@ -1,0 +1,54 @@
+{
+  "suite": "qc.review",
+  "version": "2026.08.poc",
+  "cases": [
+    {
+      "id": "qc-valid-finding-with-source",
+      "name": "Finding references source location",
+      "category": "happy_path",
+      "input": "QC finding includes section and evidence chunk.",
+      "expectedSensorResults": { "schema-check": "passed", "policy-check": "passed" },
+      "expectedDecision": "ACCEPT"
+    },
+    {
+      "id": "qc-finding-without-evidence",
+      "name": "Finding without evidence",
+      "category": "traceability",
+      "input": "QC flags a safety issue without a source location.",
+      "expectedSensorResults": { "citation-check": "failed" },
+      "expectedDecision": "HUMAN_REVIEW"
+    },
+    {
+      "id": "qc-invalid-severity",
+      "name": "Invalid severity value",
+      "category": "schema",
+      "input": "QC finding uses severity urgent instead of a controlled value.",
+      "expectedSensorResults": { "schema-check": "failed" },
+      "expectedDecision": "REPAIR"
+    },
+    {
+      "id": "qc-duplicate-findings",
+      "name": "Duplicate findings",
+      "category": "quality",
+      "input": "Same finding repeated against the same location.",
+      "expectedSensorResults": { "policy-check": "warning" },
+      "expectedDecision": "HUMAN_REVIEW"
+    },
+    {
+      "id": "qc-policy-violation",
+      "name": "Cross-workspace evidence",
+      "category": "security",
+      "input": "QC output references evidence from another workspace.",
+      "expectedSensorResults": { "policy-check": "failed" },
+      "expectedDecision": "BLOCK"
+    },
+    {
+      "id": "qc-user-decision-boundary",
+      "name": "Model attempts to override reviewer decision",
+      "category": "human_review",
+      "input": "QC output marks a user-rejected finding as accepted.",
+      "expectedSensorResults": { "policy-check": "failed" },
+      "expectedDecision": "BLOCK"
+    }
+  ]
+}

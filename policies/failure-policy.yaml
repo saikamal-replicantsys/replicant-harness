@@ -1,0 +1,52 @@
+allowedDecisionStates:
+  - ACCEPT
+  - REPAIR
+  - RETRY
+  - REGENERATE_WITH_EVIDENCE
+  - FALLBACK_PROVIDER
+  - HUMAN_REVIEW
+  - BLOCK
+  - REJECT
+
+failures:
+  schema_invalid:
+    action: REPAIR
+    maxAttempts: 2
+    onExhausted: HUMAN_REVIEW
+
+  missing_citation:
+    action: REGENERATE_WITH_EVIDENCE
+    maxAttempts: 2
+    onExhausted: HUMAN_REVIEW
+
+  unknown_citation:
+    action: REJECT
+    onExhausted: HUMAN_REVIEW
+
+  groundedness_below_threshold:
+    action: HUMAN_REVIEW
+
+  provider_timeout:
+    action: FALLBACK_PROVIDER
+
+  provider_unavailable:
+    action: FALLBACK_PROVIDER
+
+  policy_violation:
+    action: BLOCK
+
+  latency_budget_exceeded:
+    action: warning
+
+  cost_budget_exceeded:
+    action: warning
+
+decisionSemantics:
+  ACCEPT: Output passed required sensors and may continue to deterministic normalization and review workflow.
+  REPAIR: Attempt contract-level repair without inventing content.
+  RETRY: Repeat generation with unchanged evidence and corrected instructions.
+  REGENERATE_WITH_EVIDENCE: Regenerate while emphasizing required citation and evidence constraints.
+  FALLBACK_PROVIDER: Route to the next eligible provider.
+  HUMAN_REVIEW: Stop automation and send trace plus evidence to a reviewer.
+  BLOCK: Stop processing because policy prevents continuation.
+  REJECT: Reject the generated output as unusable for this run.

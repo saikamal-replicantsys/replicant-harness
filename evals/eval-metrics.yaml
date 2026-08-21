@@ -1,0 +1,65 @@
+metrics:
+  schemaValidity:
+    type: blocking
+    description: Percentage of outputs that satisfy the workflow contract.
+    good: high
+    warning: declining trend or repeated repair dependence
+
+  citationCoverage:
+    type: blocking
+    description: Cited source-backed blocks divided by total source-backed blocks.
+    good: complete coverage for source-backed claims
+    warning: any gap in regulated content
+
+  citationValidity:
+    type: blocking
+    description: Percentage of cited chunk IDs that exist in the supplied evidence catalog.
+    good: all cited IDs exist
+    warning: any unknown or fabricated chunk ID
+
+  groundednessScore:
+    type: blocking
+    description: Conceptual support score for generated claims against cited evidence.
+    good: at or above workflow threshold
+    warning: close to threshold or inconsistent across evaluators
+
+  policyCompliance:
+    type: blocking
+    description: Provider, workspace, sensitive-content, and regulated-workflow policy adherence.
+    good: no policy violations
+    warning: any unresolved policy ambiguity
+
+  repairSuccessRate:
+    type: aggregated
+    description: Rate at which repair or regeneration resolves blocking failures.
+    good: useful for spotting recurring model or guide issues
+    warning: increasing repair dependence
+
+  providerFallbackRate:
+    type: aggregated
+    description: Rate at which runs move from preferred to fallback provider.
+    good: low and explainable
+    warning: provider instability or policy mismatch
+
+  humanReviewRate:
+    type: aggregated
+    description: Rate of runs escalated to human review.
+    good: appropriate to workflow risk
+    warning: sudden change by provider, prompt version, or document type
+
+  latency:
+    type: advisory
+    description: Attempt and run latency compared with workflow budget.
+    good: below configured limits
+    warning: repeated budget pressure
+
+  estimatedCostBand:
+    type: advisory
+    description: Conceptual low, medium, or high cost band for attempts and runs.
+    good: aligned with workflow expectations
+    warning: unexpected movement to higher bands
+
+notes:
+  - This POC does not invent fake production metrics.
+  - Real thresholds should be calibrated with workflow risk, historical traces, and reviewer feedback.
+  - Blocking metrics affect decisions; advisory metrics inform routing, reporting, and optimization.

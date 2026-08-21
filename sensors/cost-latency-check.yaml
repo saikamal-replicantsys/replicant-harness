@@ -1,0 +1,25 @@
+id: cost-latency-check
+name: Cost And Latency Check
+description: Tracks latency, token estimates, and conceptual relative cost bands for provider attempts.
+severity: advisory
+appliesTo:
+  - writer.section_generation
+  - qc.review
+rules:
+  - id: max-latency
+    description: Warn when an attempt exceeds the configured latency budget.
+  - id: max-estimated-cost
+    description: Warn when an attempt exceeds the configured cost budget.
+  - id: token-thresholds
+    description: Warn when input or output token estimates exceed workflow thresholds.
+  - id: fallback-signal
+    description: Repeated latency warnings can contribute to provider fallback decisions.
+resultContract: contracts/sensor-result.schema.json
+failureAction: warning
+thresholds:
+  maxLatencyMs: 15000
+  maxEstimatedCostUsd: 0.08
+  costBands:
+    - low
+    - medium
+    - high

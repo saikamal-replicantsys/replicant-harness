@@ -1,0 +1,23 @@
+{
+  "scenarioId": "03-invalid-schema",
+  "expectedLifecycle": [
+    {
+      "attempt": 1,
+      "expectedSensorResults": [
+        { "sensor": "schema-check", "status": "failed" }
+      ],
+      "expectedDecision": "REPAIR"
+    },
+    {
+      "attempt": 2,
+      "expectedSensorResults": [
+        { "sensor": "schema-check", "status": "passed" },
+        { "sensor": "citation-check", "status": "passed" },
+        { "sensor": "groundedness-check", "status": "passed" },
+        { "sensor": "policy-check", "status": "passed" }
+      ],
+      "expectedDecision": "ACCEPT"
+    }
+  ],
+  "expectedFinalDecision": "ACCEPT"
+}

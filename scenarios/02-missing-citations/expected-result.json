@@ -1,0 +1,24 @@
+{
+  "scenarioId": "02-missing-citations",
+  "expectedLifecycle": [
+    {
+      "attempt": 1,
+      "expectedSensorResults": [
+        { "sensor": "schema-check", "status": "passed" },
+        { "sensor": "citation-check", "status": "failed" }
+      ],
+      "expectedDecision": "REGENERATE_WITH_EVIDENCE"
+    },
+    {
+      "attempt": 2,
+      "expectedSensorResults": [
+        { "sensor": "schema-check", "status": "passed" },
+        { "sensor": "citation-check", "status": "passed" },
+        { "sensor": "groundedness-check", "status": "passed" },
+        { "sensor": "policy-check", "status": "passed" }
+      ],
+      "expectedDecision": "ACCEPT"
+    }
+  ],
+  "expectedFinalDecision": "ACCEPT"
+}

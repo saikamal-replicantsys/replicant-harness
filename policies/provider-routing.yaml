@@ -1,0 +1,37 @@
+policyId: provider-routing
+defaultPolicy: balanced
+
+selectionInputs:
+  - workflow
+  - workspacePolicy
+  - requiredCapabilities
+  - preferredProvider
+  - fallbackProviders
+  - latencyBudget
+  - costSensitivity
+  - regulatedWorkflowConstraints
+
+rules:
+  - id: preferred-provider-first
+    description: Use the configured preferred provider when it is enabled and satisfies workflow constraints.
+    action: select_preferred
+
+  - id: capability-match-required
+    description: Providers must support structured output for Writer section generation.
+    action: filter
+
+  - id: regulated-workflow-constraints
+    description: Provider routing must honor data residency, enterprise approval, and workspace policy.
+    action: filter
+
+  - id: fallback-on-provider-failure
+    description: Timeout or provider unavailability triggers the next eligible fallback provider.
+    action: FALLBACK_PROVIDER
+
+  - id: cost-sensitive-routing
+    description: Cost-sensitive workloads prefer lower relative cost bands when required capabilities are equal.
+    action: rank
+
+  - id: latency-sensitive-routing
+    description: Latency-sensitive workloads prefer lower latency bands when required capabilities are equal.
+    action: rank

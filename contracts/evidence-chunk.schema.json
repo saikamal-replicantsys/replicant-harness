@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://replisense.example/contracts/evidence-chunk.schema.json",
+  "title": "Evidence Chunk",
+  "type": "object",
+  "required": ["chunkId", "sourceId", "quote"],
+  "additionalProperties": false,
+  "properties": {
+    "chunkId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quote": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pageNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sectionTitle": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "runId": "run-valid-generation-001",
+  "workflow": "writer.section_generation",
+  "workflowVersion": "2026.08.poc",
+  "startedAt": "2026-08-21T09:00:00Z",
+  "completedAt": "2026-08-21T09:00:04Z",
+  "provider": "gemini",
+  "model": "provider-configured-structured-generation-model",
+  "providerRoutingReason": "Preferred provider satisfied structured output and workspace policy constraints.",
+  "guideVersions": {
+    "architecture": "architecture-guide-2026.08",
+    "writer": "writer-guide-2026.08",
+    "security": "security-policy-2026.08",
+    "evidence": "evidence-policy-2026.08"
+  },
+  "contractVersions": {
+    "input": "writer-request.schema.json",
+    "output": "writer-response.schema.json",
+    "sensorResult": "sensor-result.schema.json"
+  },
+  "evidenceIds": ["chunk-clinical-001"],
+  "attempts": [
+    {
+      "attempt": 1,
+      "provider": "gemini",
+      "model": "provider-configured-structured-generation-model",
+      "status": "passed_validation",
+      "latencyMs": 4100,
+      "estimatedTokens": {
+        "input": 860,
+        "output": 80
+      },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        { "sensor": "schema-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} },
+        { "sensor": "citation-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": { "coverage": 1 } },
+        { "sensor": "groundedness-check", "status": "passed", "severity": "blocking", "score": 0.96, "violations": [], "metadata": { "implementation": "poc-static-expectation" } },
+        { "sensor": "policy-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} }
+      ],
+      "triggeredAction": "ACCEPT"
+    }
+  ],
+  "finalDecision": "ACCEPT"
+}

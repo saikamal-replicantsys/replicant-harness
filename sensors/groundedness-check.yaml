@@ -1,0 +1,20 @@
+id: groundedness-check
+name: Groundedness Check
+description: Conceptually evaluates whether generated claims are supported by the supplied evidence.
+severity: blocking
+appliesTo:
+  - writer.section_generation
+rules:
+  - id: claim-supported-by-evidence
+    description: Generated factual claims should be entailed by the cited evidence.
+  - id: no-exaggeration
+    description: The model must not strengthen modest evidence into stronger efficacy, safety, or compliance claims.
+  - id: citation-is-not-groundedness
+    description: A valid chunk ID proves traceability, not semantic support.
+  - id: evaluator-required-in-real-system
+    description: This POC does not implement a semantic evaluator; production would require deterministic rules, reviewer checks, or evaluator models.
+resultContract: contracts/sensor-result.schema.json
+failureAction: HUMAN_REVIEW
+thresholds:
+  minimumScore: 0.85
+  warningScore: 0.92

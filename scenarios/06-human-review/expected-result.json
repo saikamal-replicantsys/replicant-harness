@@ -1,0 +1,11 @@
+{
+  "scenarioId": "06-human-review",
+  "expectedSensorResults": [
+    { "sensor": "schema-check", "status": "passed" },
+    { "sensor": "citation-check", "status": "passed" },
+    { "sensor": "groundedness-check", "status": "warning" },
+    { "sensor": "policy-check", "status": "passed" }
+  ],
+  "expectedDecision": "HUMAN_REVIEW",
+  "reason": "Conflicting benefit and risk evidence requires a reviewer before accepting a regulated risk-benefit conclusion."
+}

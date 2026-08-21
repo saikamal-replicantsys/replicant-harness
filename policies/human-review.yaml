@@ -1,0 +1,32 @@
+policyId: human-review
+description: Defines conditions where automation must stop and route the run to a human reviewer.
+
+escalationTriggers:
+  - id: low-groundedness
+    reason: Generated claims are not sufficiently supported by evidence.
+    decision: HUMAN_REVIEW
+
+  - id: conflicting-evidence
+    reason: Evidence chunks support materially different conclusions.
+    decision: HUMAN_REVIEW
+
+  - id: repeated-repair-failure
+    reason: The run exhausted repair or regeneration attempts.
+    decision: HUMAN_REVIEW
+
+  - id: regulated-high-risk-content
+    reason: Workflow policy requires a reviewer before accepting high-risk regulated content.
+    decision: HUMAN_REVIEW
+
+  - id: unresolved-policy-risk
+    reason: Provider, workspace, or sensitive-content policy cannot be resolved automatically.
+    decision: BLOCK
+
+reviewPackage:
+  include:
+    - runTrace
+    - attempts
+    - sensorResults
+    - evidenceIds
+    - generatedBlocks
+    - failureReasons

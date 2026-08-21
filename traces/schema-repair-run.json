@@ -1,0 +1,63 @@
+{
+  "runId": "run-invalid-schema-001",
+  "workflow": "writer.section_generation",
+  "workflowVersion": "2026.08.poc",
+  "startedAt": "2026-08-21T09:10:00Z",
+  "completedAt": "2026-08-21T09:10:08Z",
+  "provider": "gemini",
+  "model": "provider-configured-structured-generation-model",
+  "providerRoutingReason": "Preferred provider selected; schema repair stayed provider-neutral.",
+  "guideVersions": {
+    "architecture": "architecture-guide-2026.08",
+    "writer": "writer-guide-2026.08",
+    "security": "security-policy-2026.08",
+    "evidence": "evidence-policy-2026.08"
+  },
+  "contractVersions": {
+    "input": "writer-request.schema.json",
+    "output": "writer-response.schema.json",
+    "sensorResult": "sensor-result.schema.json"
+  },
+  "evidenceIds": ["chunk-safety-001"],
+  "attempts": [
+    {
+      "attempt": 1,
+      "provider": "gemini",
+      "model": "provider-configured-structured-generation-model",
+      "status": "failed_validation",
+      "latencyMs": 3600,
+      "estimatedTokens": { "input": 820, "output": 64 },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        {
+          "sensor": "schema-check",
+          "status": "failed",
+          "severity": "blocking",
+          "score": 0,
+          "violations": [
+            { "rule": "output-schema-valid", "path": "$.blocks", "message": "Expected array, received string." }
+          ],
+          "metadata": {}
+        }
+      ],
+      "triggeredAction": "REPAIR"
+    },
+    {
+      "attempt": 2,
+      "provider": "gemini",
+      "model": "provider-neutral-repair",
+      "status": "passed_validation",
+      "latencyMs": 1100,
+      "estimatedTokens": { "input": 160, "output": 72 },
+      "estimatedCostBand": "low",
+      "sensorResults": [
+        { "sensor": "schema-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} },
+        { "sensor": "citation-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": { "coverage": 1 } },
+        { "sensor": "groundedness-check", "status": "passed", "severity": "blocking", "score": 0.94, "violations": [], "metadata": { "implementation": "poc-static-expectation" } },
+        { "sensor": "policy-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} }
+      ],
+      "triggeredAction": "ACCEPT"
+    }
+  ],
+  "finalDecision": "ACCEPT"
+}

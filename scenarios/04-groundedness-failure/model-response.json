@@ -1,0 +1,10 @@
+{
+  "sectionId": "section-clinical-summary",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "The treatment demonstrated strong and statistically significant efficacy.",
+      "chunkIds": ["chunk-clinical-weak-001"]
+    }
+  ]
+}

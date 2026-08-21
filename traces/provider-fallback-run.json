@@ -1,0 +1,54 @@
+{
+  "runId": "run-provider-fallback-001",
+  "workflow": "writer.section_generation",
+  "workflowVersion": "2026.08.poc",
+  "startedAt": "2026-08-21T09:15:00Z",
+  "completedAt": "2026-08-21T09:15:18Z",
+  "provider": "bedrock",
+  "model": "provider-configured-structured-generation-model",
+  "providerRoutingReason": "Gemini timed out; Bedrock was the next eligible provider satisfying structured output and workspace policy constraints.",
+  "guideVersions": {
+    "architecture": "architecture-guide-2026.08",
+    "writer": "writer-guide-2026.08",
+    "security": "security-policy-2026.08",
+    "evidence": "evidence-policy-2026.08"
+  },
+  "contractVersions": {
+    "input": "writer-request.schema.json",
+    "output": "writer-response.schema.json",
+    "sensorResult": "sensor-result.schema.json"
+  },
+  "evidenceIds": ["chunk-clinical-001"],
+  "attempts": [
+    {
+      "attempt": 1,
+      "provider": "gemini",
+      "model": "provider-configured-structured-generation-model",
+      "status": "provider_timeout",
+      "latencyMs": 15000,
+      "estimatedTokens": { "input": 870, "output": 0 },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        { "sensor": "cost-latency-check", "status": "warning", "severity": "advisory", "score": 0.5, "violations": [{ "rule": "max-latency", "message": "Attempt exceeded latency budget." }], "metadata": { "latencyBudgetMs": 15000 } }
+      ],
+      "triggeredAction": "FALLBACK_PROVIDER"
+    },
+    {
+      "attempt": 2,
+      "provider": "bedrock",
+      "model": "provider-configured-structured-generation-model",
+      "status": "passed_validation",
+      "latencyMs": 3300,
+      "estimatedTokens": { "input": 870, "output": 82 },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        { "sensor": "schema-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} },
+        { "sensor": "citation-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": { "coverage": 1 } },
+        { "sensor": "groundedness-check", "status": "passed", "severity": "blocking", "score": 0.95, "violations": [], "metadata": { "implementation": "poc-static-expectation" } },
+        { "sensor": "policy-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} }
+      ],
+      "triggeredAction": "ACCEPT"
+    }
+  ],
+  "finalDecision": "ACCEPT"
+}

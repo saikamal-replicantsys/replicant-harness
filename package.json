@@ -1,0 +1,27 @@
+{
+  "name": "replisense-harness-poc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Conceptual RepliSense AI engineering harness POC with deterministic demo traces.",
+  "license": "MIT",
+  "keywords": [
+    "ai-engineering",
+    "llm",
+    "harness",
+    "regulated-documents",
+    "replisense",
+    "traceability",
+    "evaluations",
+    "provider-abstraction",
+    "citation-validation",
+    "proof-of-concept"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saikamal-replicantsys/replicant-harness.git"
+  },
+  "scripts": {
+    "demo": "node tools/demo-runner.mjs"
+  }
+}

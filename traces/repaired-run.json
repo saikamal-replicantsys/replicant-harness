@@ -1,0 +1,80 @@
+{
+  "runId": "run-missing-citations-001",
+  "workflow": "writer.section_generation",
+  "workflowVersion": "2026.08.poc",
+  "startedAt": "2026-08-21T09:05:00Z",
+  "completedAt": "2026-08-21T09:05:09Z",
+  "provider": "gemini",
+  "model": "provider-configured-structured-generation-model",
+  "providerRoutingReason": "Preferred provider satisfied structured output and workspace policy constraints.",
+  "guideVersions": {
+    "architecture": "architecture-guide-2026.08",
+    "writer": "writer-guide-2026.08",
+    "security": "security-policy-2026.08",
+    "evidence": "evidence-policy-2026.08"
+  },
+  "contractVersions": {
+    "input": "writer-request.schema.json",
+    "output": "writer-response.schema.json",
+    "sensorResult": "sensor-result.schema.json",
+    "runTrace": "run-trace.schema.json"
+  },
+  "evidenceIds": ["chunk-clinical-001"],
+  "attempts": [
+    {
+      "attempt": 1,
+      "provider": "gemini",
+      "model": "provider-configured-structured-generation-model",
+      "status": "failed_validation",
+      "latencyMs": 3900,
+      "estimatedTokens": {
+        "input": 870,
+        "output": 70
+      },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        { "sensor": "schema-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} },
+        {
+          "sensor": "citation-check",
+          "status": "failed",
+          "severity": "blocking",
+          "score": 0,
+          "violations": [
+            {
+              "rule": "source-backed-block-requires-citation",
+              "blockIndex": 0,
+              "message": "The paragraph makes a source-backed efficacy claim but has no chunkIds."
+            }
+          ],
+          "metadata": {
+            "sourceBackedBlocks": 1,
+            "citedSourceBackedBlocks": 0,
+            "coverage": 0
+          }
+        }
+      ],
+      "triggeredAction": "REGENERATE_WITH_EVIDENCE"
+    },
+    {
+      "attempt": 2,
+      "provider": "gemini",
+      "model": "provider-configured-structured-generation-model",
+      "status": "passed_validation",
+      "latencyMs": 4300,
+      "estimatedTokens": {
+        "input": 940,
+        "output": 76
+      },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        { "sensor": "schema-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} },
+        { "sensor": "citation-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": { "sourceBackedBlocks": 1, "citedSourceBackedBlocks": 1, "coverage": 1, "evidenceIds": ["chunk-clinical-001"] } },
+        { "sensor": "groundedness-check", "status": "passed", "severity": "blocking", "score": 0.95, "violations": [], "metadata": { "implementation": "poc-static-expectation" } },
+        { "sensor": "policy-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": { "workspaceId": "workspace-demo-pharma" } },
+        { "sensor": "cost-latency-check", "status": "passed", "severity": "advisory", "score": 1, "violations": [], "metadata": { "latencyBudgetMs": 15000, "costBand": "medium" } }
+      ],
+      "triggeredAction": "ACCEPT"
+    }
+  ],
+  "finalDecision": "ACCEPT"
+}

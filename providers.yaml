@@ -1,0 +1,56 @@
+providers:
+  gemini:
+    enabled: true
+    role: preferred
+    costBand: medium
+    latencyBand: low
+    dataResidencyModes:
+      - enterprise_configurable
+    capabilities:
+      structuredOutput: true
+      longContext: true
+      toolCalling: true
+      streaming: true
+    constraints:
+      regulatedWorkflowAllowed: true
+      requiresWorkspacePolicyApproval: true
+
+  bedrock:
+    enabled: true
+    role: fallback
+    costBand: medium
+    latencyBand: medium
+    dataResidencyModes:
+      - region_configurable
+    capabilities:
+      structuredOutput: true
+      longContext: true
+      toolCalling: model_dependent
+      streaming: true
+    constraints:
+      regulatedWorkflowAllowed: true
+      requiresWorkspacePolicyApproval: true
+
+routing:
+  supportedPolicies:
+    - preferred_provider
+    - fallback_provider
+    - capability_matching
+    - cost_sensitive
+    - latency_sensitive
+    - regulated_workflow_constraints
+  defaultPolicy: balanced
+  rules:
+    - id: require-structured-output
+      description: Writer generation requires structured output support.
+      capability: structuredOutput
+      required: true
+    - id: respect-workspace-policy
+      description: Provider selection must honor workspace, tenant, data residency, and enterprise policy constraints.
+      required: true
+    - id: fallback-on-timeout
+      description: If the preferred provider is unavailable or times out, route to the first eligible fallback provider.
+      action: FALLBACK_PROVIDER
+    - id: avoid-provider-specific-workflow-logic
+      description: Workflow logic receives provider-neutral responses and traces.
+      required: true

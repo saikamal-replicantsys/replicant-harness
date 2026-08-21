@@ -1,0 +1,30 @@
+sensors:
+  - id: schema-check
+    phase: pre_and_post_generation
+    severity: blocking
+    purpose: Validate request and response contracts before downstream processing.
+    config: sensors/schema-check.yaml
+
+  - id: citation-check
+    phase: post_generation
+    severity: blocking
+    purpose: Verify source-backed blocks cite valid supplied evidence chunks.
+    config: sensors/citation-check.yaml
+
+  - id: groundedness-check
+    phase: post_generation
+    severity: blocking
+    purpose: Evaluate whether generated claims are supported by the cited evidence.
+    config: sensors/groundedness-check.yaml
+
+  - id: cost-latency-check
+    phase: post_attempt
+    severity: advisory
+    purpose: Track latency, token estimates, and cost bands for routing and reporting.
+    config: sensors/cost-latency-check.yaml
+
+  - id: policy-check
+    phase: pre_and_post_generation
+    severity: blocking
+    purpose: Enforce provider, workspace, sensitive-content, and regulated-workflow constraints.
+    config: sensors/policy-check.yaml

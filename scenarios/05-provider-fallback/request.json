@@ -1,0 +1,27 @@
+{
+  "workflowId": "writer.section_generation",
+  "runId": "run-provider-fallback-001",
+  "workspaceId": "workspace-demo-pharma",
+  "documentId": "document-clinical-overview",
+  "section": {
+    "sectionId": "section-clinical-summary",
+    "title": "Clinical Summary",
+    "intent": "Summarize primary efficacy with cited evidence."
+  },
+  "evidence_chunks": [
+    {
+      "chunkId": "chunk-clinical-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "The treatment group demonstrated a statistically significant improvement in the primary efficacy endpoint compared with placebo.",
+      "pageNumber": 12,
+      "sectionTitle": "Primary Efficacy Endpoint",
+      "metadata": {
+        "documentType": "clinical-study-report"
+      }
+    }
+  ],
+  "generation": {
+    "providerPreference": "auto",
+    "temperature": 0.2
+  }
+}

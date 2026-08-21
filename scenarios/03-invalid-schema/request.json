@@ -1,0 +1,27 @@
+{
+  "workflowId": "writer.section_generation",
+  "runId": "run-invalid-schema-001",
+  "workspaceId": "workspace-demo-pharma",
+  "documentId": "document-clinical-overview",
+  "section": {
+    "sectionId": "section-safety-summary",
+    "title": "Safety Summary",
+    "intent": "Summarize the observed safety result using structured blocks."
+  },
+  "evidence_chunks": [
+    {
+      "chunkId": "chunk-safety-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "No treatment-related serious adverse events were reported during the observation period.",
+      "pageNumber": 18,
+      "sectionTitle": "Safety Results",
+      "metadata": {
+        "documentType": "clinical-study-report"
+      }
+    }
+  ],
+  "generation": {
+    "providerPreference": "auto",
+    "temperature": 0.2
+  }
+}

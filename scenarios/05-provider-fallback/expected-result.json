@@ -1,0 +1,23 @@
+{
+  "scenarioId": "05-provider-fallback",
+  "expectedLifecycle": [
+    {
+      "attempt": 1,
+      "provider": "gemini",
+      "status": "provider_timeout",
+      "expectedDecision": "FALLBACK_PROVIDER"
+    },
+    {
+      "attempt": 2,
+      "provider": "bedrock",
+      "expectedSensorResults": [
+        { "sensor": "schema-check", "status": "passed" },
+        { "sensor": "citation-check", "status": "passed" },
+        { "sensor": "groundedness-check", "status": "passed" },
+        { "sensor": "policy-check", "status": "passed" }
+      ],
+      "expectedDecision": "ACCEPT"
+    }
+  ],
+  "expectedFinalDecision": "ACCEPT"
+}

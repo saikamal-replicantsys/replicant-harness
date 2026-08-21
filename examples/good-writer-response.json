@@ -1,0 +1,23 @@
+{
+  "sectionId": "section-clinical-summary",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Clinical Summary"
+    },
+    {
+      "type": "paragraph",
+      "text": "The treatment group demonstrated a statistically significant improvement in the primary efficacy endpoint compared with placebo.",
+      "chunkIds": ["chunk-clinical-001"]
+    },
+    {
+      "type": "table",
+      "columns": ["Endpoint", "Finding", "Evidence"],
+      "rows": [
+        ["Primary efficacy endpoint", "Statistically significant improvement compared with placebo", "chunk-clinical-001"]
+      ],
+      "chunkIds": ["chunk-clinical-001"]
+    }
+  ]
+}

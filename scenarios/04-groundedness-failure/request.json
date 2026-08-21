@@ -1,0 +1,27 @@
+{
+  "workflowId": "writer.section_generation",
+  "runId": "run-groundedness-failure-001",
+  "workspaceId": "workspace-demo-pharma",
+  "documentId": "document-clinical-overview",
+  "section": {
+    "sectionId": "section-clinical-summary",
+    "title": "Clinical Summary",
+    "intent": "Summarize efficacy without overstating the evidence."
+  },
+  "evidence_chunks": [
+    {
+      "chunkId": "chunk-clinical-weak-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "Observed improvement was 4% and was not statistically significant.",
+      "pageNumber": 13,
+      "sectionTitle": "Exploratory Endpoint",
+      "metadata": {
+        "documentType": "clinical-study-report"
+      }
+    }
+  ],
+  "generation": {
+    "providerPreference": "auto",
+    "temperature": 0.2
+  }
+}

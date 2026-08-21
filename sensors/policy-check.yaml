@@ -1,0 +1,20 @@
+id: policy-check
+name: Policy Check
+description: Evaluates provider, workspace, sensitive-content, tool-use, and regulated-workflow constraints.
+severity: blocking
+appliesTo:
+  - writer.section_generation
+  - qc.review
+rules:
+  - id: provider-policy
+    description: Provider must be enabled and allowed for the workspace and workflow.
+  - id: workspace-isolation
+    description: Evidence and generated output must remain within the requesting workspace boundary.
+  - id: sensitive-content-handling
+    description: Sensitive values should be referenced rather than copied into logs when possible.
+  - id: unsupported-tool-usage
+    description: Model-driven workflow steps may not invoke tools outside the approved workflow boundary.
+  - id: regulatory-constraints
+    description: Regulated high-risk content must preserve human review boundaries.
+resultContract: contracts/sensor-result.schema.json
+failureAction: BLOCK

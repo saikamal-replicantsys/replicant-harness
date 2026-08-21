@@ -1,0 +1,37 @@
+{
+  "workspaceId": "workspace-demo-pharma",
+  "documentId": "document-clinical-overview",
+  "chunks": [
+    {
+      "chunkId": "chunk-clinical-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "The treatment group demonstrated a statistically significant improvement in the primary efficacy endpoint compared with placebo.",
+      "pageNumber": 12,
+      "sectionTitle": "Primary Efficacy Endpoint",
+      "metadata": {
+        "documentType": "clinical-study-report",
+        "studyId": "study-demo-101"
+      }
+    },
+    {
+      "chunkId": "chunk-clinical-weak-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "Observed improvement was 4% and was not statistically significant.",
+      "pageNumber": 13,
+      "sectionTitle": "Exploratory Endpoint",
+      "metadata": {
+        "documentType": "clinical-study-report"
+      }
+    },
+    {
+      "chunkId": "chunk-safety-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "No treatment-related serious adverse events were reported during the observation period.",
+      "pageNumber": 18,
+      "sectionTitle": "Safety Results",
+      "metadata": {
+        "documentType": "clinical-study-report"
+      }
+    }
+  ]
+}

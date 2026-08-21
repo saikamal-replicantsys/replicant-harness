@@ -1,0 +1,86 @@
+{
+  "suite": "writer.section_generation",
+  "version": "2026.08.poc",
+  "cases": [
+    {
+      "id": "writer-valid-source-backed-paragraph",
+      "name": "Valid source-backed paragraph",
+      "category": "happy_path",
+      "input": "Source-backed paragraph cites chunk-clinical-001.",
+      "expectedSensorResults": { "schema-check": "passed", "citation-check": "passed", "groundedness-check": "passed", "policy-check": "passed" },
+      "expectedDecision": "ACCEPT"
+    },
+    {
+      "id": "writer-missing-citation",
+      "name": "Missing citation on factual claim",
+      "category": "citation",
+      "input": "Efficacy claim with empty chunkIds.",
+      "expectedSensorResults": { "schema-check": "passed", "citation-check": "failed" },
+      "expectedDecision": "REGENERATE_WITH_EVIDENCE"
+    },
+    {
+      "id": "writer-unknown-citation",
+      "name": "Unknown chunk ID",
+      "category": "citation",
+      "input": "Response cites chunk-made-up-999.",
+      "expectedSensorResults": { "schema-check": "passed", "citation-check": "failed" },
+      "expectedDecision": "REJECT"
+    },
+    {
+      "id": "writer-unsupported-block-type",
+      "name": "Unsupported block type",
+      "category": "schema",
+      "input": "Response includes a chart block not in the contract.",
+      "expectedSensorResults": { "schema-check": "failed" },
+      "expectedDecision": "REPAIR"
+    },
+    {
+      "id": "writer-malformed-table",
+      "name": "Malformed table",
+      "category": "schema",
+      "input": "Table rows are returned as strings instead of arrays.",
+      "expectedSensorResults": { "schema-check": "failed" },
+      "expectedDecision": "REPAIR"
+    },
+    {
+      "id": "writer-groundedness-failure",
+      "name": "Groundedness failure despite citation",
+      "category": "groundedness",
+      "input": "Evidence says not statistically significant; response says statistically significant.",
+      "expectedSensorResults": { "schema-check": "passed", "citation-check": "passed", "groundedness-check": "failed" },
+      "expectedDecision": "HUMAN_REVIEW"
+    },
+    {
+      "id": "writer-conflicting-evidence",
+      "name": "Conflicting evidence",
+      "category": "human_review",
+      "input": "Benefit and risk evidence support different reviewer interpretations.",
+      "expectedSensorResults": { "schema-check": "passed", "citation-check": "passed", "groundedness-check": "warning" },
+      "expectedDecision": "HUMAN_REVIEW"
+    },
+    {
+      "id": "writer-valid-non-source-intro",
+      "name": "Valid non-source introductory text",
+      "category": "citation",
+      "input": "Heading and non-factual introductory sentence without citations.",
+      "expectedSensorResults": { "schema-check": "passed", "citation-check": "passed" },
+      "expectedDecision": "ACCEPT"
+    },
+    {
+      "id": "writer-provider-fallback",
+      "name": "Preferred provider unavailable",
+      "category": "provider",
+      "input": "Gemini timeout followed by Bedrock structured response.",
+      "expectedSensorResults": { "cost-latency-check": "warning", "schema-check": "passed", "citation-check": "passed" },
+      "expectedDecision": "ACCEPT"
+    },
+    {
+      "id": "writer-repeated-repair-failure",
+      "name": "Repeated repair failure",
+      "category": "schema",
+      "input": "Two malformed responses after repair attempts.",
+      "expectedSensorResults": { "schema-check": "failed" },
+      "expectedDecision": "HUMAN_REVIEW"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "workflowId": "writer.section_generation",
+  "runId": "run-human-review-001",
+  "workspaceId": "workspace-demo-pharma",
+  "documentId": "document-clinical-overview",
+  "section": {
+    "sectionId": "section-risk-benefit",
+    "title": "Risk Benefit Summary",
+    "intent": "Draft a cautious risk-benefit statement when evidence is conflicting."
+  },
+  "evidence_chunks": [
+    {
+      "chunkId": "chunk-benefit-001",
+      "sourceId": "source-study-report-demo",
+      "quote": "The treatment group showed improvement on the primary endpoint.",
+      "pageNumber": 12,
+      "sectionTitle": "Primary Efficacy Endpoint",
+      "metadata": {
+        "documentType": "clinical-study-report"
+      }
+    },
+    {
+      "chunkId": "chunk-risk-001",
+      "sourceId": "source-safety-addendum-demo",
+      "quote": "A higher rate of treatment-emergent adverse events was observed in the treatment group.",
+      "pageNumber": 4,
+      "sectionTitle": "Safety Addendum",
+      "metadata": {
+        "documentType": "safety-addendum"
+      }
+    }
+  ],
+  "generation": {
+    "providerPreference": "auto",
+    "temperature": 0.2
+  }
+}

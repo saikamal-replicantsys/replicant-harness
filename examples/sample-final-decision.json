@@ -1,0 +1,17 @@
+{
+  "runId": "run-missing-citations-001",
+  "workflow": "writer.section_generation",
+  "finalDecision": "ACCEPT",
+  "acceptedAttempt": 2,
+  "summary": "Attempt 1 passed schema validation but failed citation coverage. Attempt 2 cited supplied evidence and passed required sensors.",
+  "requiredSensors": {
+    "schema-check": "passed",
+    "citation-check": "passed",
+    "groundedness-check": "passed",
+    "policy-check": "passed"
+  },
+  "advisorySensors": {
+    "cost-latency-check": "passed"
+  },
+  "nextApplicationStep": "Node deterministic normalization followed by human review workflow."
+}

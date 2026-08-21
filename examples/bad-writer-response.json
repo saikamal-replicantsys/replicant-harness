@@ -1,0 +1,15 @@
+{
+  "sectionId": "section-clinical-summary",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "The treatment demonstrated a statistically significant improvement in the primary efficacy endpoint.",
+      "chunkIds": []
+    },
+    {
+      "type": "paragraph",
+      "text": "This result confirms broad clinical superiority.",
+      "chunkIds": ["chunk-made-up-999"]
+    }
+  ]
+}

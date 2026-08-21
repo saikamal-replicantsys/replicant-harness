@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://replisense.example/contracts/writer-request.schema.json",
+  "title": "Writer Section Generation Request",
+  "type": "object",
+  "required": ["workflowId", "runId", "workspaceId", "documentId", "section", "evidence_chunks", "generation"],
+  "additionalProperties": false,
+  "properties": {
+    "workflowId": {
+      "type": "string"
+    },
+    "runId": {
+      "type": "string"
+    },
+    "workspaceId": {
+      "type": "string"
+    },
+    "documentId": {
+      "type": "string"
+    },
+    "section": {
+      "type": "object",
+      "required": ["sectionId", "title", "intent"],
+      "additionalProperties": false,
+      "properties": {
+        "sectionId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "intent": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence_chunks": {
+      "type": "array",
+      "items": {
+        "$ref": "evidence-chunk.schema.json"
+      }
+    },
+    "generation": {
+      "type": "object",
+      "required": ["providerPreference", "temperature"],
+      "additionalProperties": false,
+      "properties": {
+        "providerPreference": {
+          "type": "string",
+          "enum": ["auto", "gemini", "bedrock"]
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

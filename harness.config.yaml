@@ -1,0 +1,52 @@
+version: 0.1
+workflow: writer.section_generation
+workflowVersion: 2026.08.poc
+
+provider:
+  routingPolicy: balanced
+  preferred: gemini
+  fallback:
+    - bedrock
+
+guides:
+  architecture: guides/architecture.md
+  writer: guides/writer-rules.md
+  security: guides/security-policy.md
+  evidence: guides/evidence-policy.md
+
+contracts:
+  input: contracts/writer-request.schema.json
+  output: contracts/writer-response.schema.json
+  evidenceChunk: contracts/evidence-chunk.schema.json
+  sensorResult: contracts/sensor-result.schema.json
+  runTrace: contracts/run-trace.schema.json
+
+sensors:
+  required:
+    - schema-check
+    - citation-check
+    - groundedness-check
+    - policy-check
+  advisory:
+    - cost-latency-check
+
+failurePolicy: policies/failure-policy.yaml
+humanReviewPolicy: policies/human-review.yaml
+
+limits:
+  maxAttempts: 3
+  maxLatencyMs: 15000
+  maxEstimatedCostUsd: 0.08
+
+observability:
+  capture:
+    - provider
+    - model
+    - attempts
+    - latency
+    - estimatedCost
+    - tokenUsage
+    - guideVersions
+    - sensorResults
+    - evidenceIds
+    - finalDecision

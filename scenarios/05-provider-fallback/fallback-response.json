@@ -1,0 +1,10 @@
+{
+  "sectionId": "section-clinical-summary",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "The treatment group demonstrated a statistically significant improvement in the primary efficacy endpoint compared with placebo.",
+      "chunkIds": ["chunk-clinical-001"]
+    }
+  ]
+}

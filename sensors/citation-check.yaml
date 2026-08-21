@@ -1,0 +1,21 @@
+id: citation-check
+name: Citation Check
+description: Ensures source-backed generated blocks cite valid evidence chunks supplied to the run.
+severity: blocking
+appliesTo:
+  - writer.section_generation
+rules:
+  - id: source-backed-block-requires-citation
+    description: A block that makes a factual source-backed claim must include at least one chunk ID.
+  - id: chunk-id-must-exist
+    description: Every cited chunk ID must exist in the request evidence catalog.
+  - id: no-fabricated-references
+    description: Fabricated or provider-invented evidence references fail validation.
+  - id: citation-coverage
+    description: Calculate coverage as cited source-backed blocks divided by total source-backed blocks.
+  - id: cite-supporting-evidence
+    description: A citation is not sufficient if the cited chunk does not support the generated claim.
+resultContract: contracts/sensor-result.schema.json
+failureAction: REGENERATE_WITH_EVIDENCE
+thresholds:
+  requiredCoverage: 1.0

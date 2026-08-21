@@ -1,0 +1,18 @@
+id: schema-check
+name: Schema Check
+description: Validates writer requests and responses against deterministic JSON Schema contracts.
+severity: blocking
+appliesTo:
+  - writer.section_generation
+rules:
+  - id: input-schema-valid
+    description: The request must match contracts/writer-request.schema.json before provider execution.
+  - id: output-schema-valid
+    description: The response must match contracts/writer-response.schema.json before downstream sensors run.
+  - id: no-node-owned-fields
+    description: Response blocks must not include blockId, order, styleId, reviewStatus, or rendering-owned metadata.
+  - id: structured-content-only
+    description: Markdown or HTML cannot substitute for structured blocks.
+resultContract: contracts/sensor-result.schema.json
+failureAction: REPAIR
+notes: Repair is allowed only for contract-shape issues that can be corrected without inventing regulated content.

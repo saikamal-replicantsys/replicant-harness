@@ -1,0 +1,54 @@
+{
+  "runId": "run-human-review-001",
+  "workflow": "writer.section_generation",
+  "workflowVersion": "2026.08.poc",
+  "startedAt": "2026-08-21T09:20:00Z",
+  "completedAt": "2026-08-21T09:20:06Z",
+  "provider": "gemini",
+  "model": "provider-configured-structured-generation-model",
+  "providerRoutingReason": "Preferred provider satisfied structured output and workspace policy constraints.",
+  "guideVersions": {
+    "architecture": "architecture-guide-2026.08",
+    "writer": "writer-guide-2026.08",
+    "security": "security-policy-2026.08",
+    "evidence": "evidence-policy-2026.08",
+    "humanReview": "human-review-policy-2026.08"
+  },
+  "contractVersions": {
+    "input": "writer-request.schema.json",
+    "output": "writer-response.schema.json",
+    "sensorResult": "sensor-result.schema.json"
+  },
+  "evidenceIds": ["chunk-benefit-001", "chunk-risk-001"],
+  "attempts": [
+    {
+      "attempt": 1,
+      "provider": "gemini",
+      "model": "provider-configured-structured-generation-model",
+      "status": "requires_human_review",
+      "latencyMs": 5200,
+      "estimatedTokens": { "input": 1040, "output": 68 },
+      "estimatedCostBand": "medium",
+      "sensorResults": [
+        { "sensor": "schema-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} },
+        { "sensor": "citation-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": { "coverage": 1 } },
+        {
+          "sensor": "groundedness-check",
+          "status": "warning",
+          "severity": "blocking",
+          "score": 0.72,
+          "violations": [
+            {
+              "rule": "conflicting-evidence",
+              "message": "Benefit and safety chunks do not support an automatic favorable risk-benefit conclusion."
+            }
+          ],
+          "metadata": { "implementation": "poc-static-expectation" }
+        },
+        { "sensor": "policy-check", "status": "passed", "severity": "blocking", "score": 1, "violations": [], "metadata": {} }
+      ],
+      "triggeredAction": "HUMAN_REVIEW"
+    }
+  ],
+  "finalDecision": "HUMAN_REVIEW"
+}
