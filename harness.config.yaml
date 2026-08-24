@@ -50,3 +50,13 @@ observability:
     - sensorResults
     - evidenceIds
     - finalDecision
+
+evaluation:
+  mode: offline_docx_comparison
+  scoringConfig: scoring/scoring.config.ts
+  defaultInput:
+    reference: eval-input/reference.docx
+    generated: eval-input/generated.docx
+  reports:
+    json: reports/latest.json
+    markdown: reports/latest.md

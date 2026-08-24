@@ -1,0 +1,1039 @@
+{
+  "timestamp": "2026-08-24T12:07:52.003Z",
+  "cases": 3,
+  "passed": 1,
+  "review": 1,
+  "failed": 1,
+  "averageScore": 74.60000000000001,
+  "medianScore": 99.2,
+  "results": [
+    {
+      "caseId": "case-fail",
+      "result": {
+        "runId": "doc-eval-1787573271598",
+        "timestamp": "2026-08-24T12:07:51.598Z",
+        "reference": {
+          "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\evals\\cases\\case-fail\\reference.docx",
+          "fileName": "reference.docx"
+        },
+        "generated": {
+          "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\evals\\cases\\case-fail\\generated.docx",
+          "fileName": "generated.docx"
+        },
+        "overallScore": 24.7,
+        "decision": "FAIL",
+        "metrics": {
+          "characterLevenshtein": {
+            "score": 0.20372184133202742,
+            "display": "20.4%",
+            "details": {
+              "distance": 813,
+              "normalizedSimilarity": 0.20372184133202742
+            }
+          },
+          "wordLevenshtein": {
+            "score": 0.17341040462427748,
+            "display": "17.3%",
+            "details": {
+              "distance": 143,
+              "normalizedSimilarity": 0.17341040462427748
+            }
+          },
+          "rouge1": {
+            "score": 0.319634703196347,
+            "display": "32.0%"
+          },
+          "rouge2": {
+            "score": 0.18433179723502305,
+            "display": "18.4%"
+          },
+          "rougeL": {
+            "score": 0.2831050228310502,
+            "display": "28.3%"
+          },
+          "tfidfCosine": {
+            "score": 0.3054715468963093,
+            "display": "30.5%"
+          },
+          "sectionCoverage": {
+            "score": 0.3333333333333333,
+            "display": "33.3%",
+            "details": {
+              "referenceCount": 6,
+              "generatedCount": 2,
+              "matched": 2,
+              "missing": [
+                "2. Identification",
+                "3. Dissolution",
+                "5. Related Substances",
+                "6. Microbial Limits"
+              ],
+              "extra": [],
+              "score": 0.3333333333333333
+            }
+          },
+          "headingCoverage": {
+            "score": 0.3333333333333333,
+            "display": "33.3%",
+            "details": {
+              "referenceCount": 6,
+              "generatedCount": 2,
+              "matched": 2,
+              "missing": [
+                "2. Identification",
+                "3. Dissolution",
+                "5. Related Substances",
+                "6. Microbial Limits"
+              ],
+              "extra": [],
+              "score": 0.3333333333333333
+            }
+          },
+          "sectionOrder": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "matched": 2,
+              "inversions": 0,
+              "score": 1
+            }
+          },
+          "numericFidelity": {
+            "score": 0.1388888888888889,
+            "display": "13.9%",
+            "details": {
+              "referenceFacts": 36,
+              "matched": 5,
+              "missing": [
+                {
+                  "raw": "20 tablets",
+                  "value": 20,
+                  "comparator": "=",
+                  "unit": "tablets",
+                  "context": "lm-coated tablets supplied in hdpe containers of s.\n\n2. identification\n\nthe infrared spectrum of"
+                },
+                {
+                  "raw": "2",
+                  "value": 2,
+                  "comparator": "=",
+                  "context": "blets supplied in hdpe containers of 20 tablets. \n2. identification\n\nthe infrared spectrum of the"
+                },
+                {
+                  "raw": "221 nm",
+                  "value": 221,
+                  "comparator": "=",
+                  "unit": "nm",
+                  "context": "ence standard. the principal peak is observed at m.\n\n3. dissolution\n\nnlt 80% of the labeled amoun"
+                },
+                {
+                  "raw": "3",
+                  "value": 3,
+                  "comparator": "=",
+                  "context": "ndard. the principal peak is observed at 221 nm. \n3. dissolution\n\nnlt 80% of the labeled amount d"
+                },
+                {
+                  "raw": "80%",
+                  "value": 80,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "peak is observed at 221 nm.\n\n3. dissolution\n\nnlt % of the labeled amount dissolves in 30 min at 5"
+                },
+                {
+                  "raw": "30 min",
+                  "value": 30,
+                  "comparator": "=",
+                  "unit": "min",
+                  "context": "tion\n\nnlt 80% of the labeled amount dissolves in n at 50 rpm using 900 ml medium.\n\n4. assay\n\nassa"
+                },
+                {
+                  "raw": "50 rpm",
+                  "value": 50,
+                  "comparator": "=",
+                  "unit": "rpm",
+                  "context": "80% of the labeled amount dissolves in 30 min at m using 900 ml medium.\n\n4. assay\n\nassay result m"
+                },
+                {
+                  "raw": "900 mL",
+                  "value": 900,
+                  "comparator": "=",
+                  "unit": "mL",
+                  "context": "beled amount dissolves in 30 min at 50 rpm using l medium.\n\n4. assay\n\nassay result must be 95.0%"
+                },
+                {
+                  "raw": "5",
+                  "value": 5,
+                  "comparator": "=",
+                  "context": "claim.\n\n% assay = (as / ar) x (cr / cs) x 100. related substances\n\nany individual impurity mu"
+                },
+                {
+                  "raw": "<= 2.0%",
+                  "value": 2,
+                  "comparator": "<=",
+                  "unit": "%",
+                  "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+                },
+                {
+                  "raw": "<= 5.0%",
+                  "value": 5,
+                  "comparator": "<=",
+                  "unit": "%",
+                  "context": "urity must be <= 2.0%. total impurities must be.\n\n6. microbial limits\n\ntotal aerobic microbial"
+                },
+                {
+                  "raw": "6",
+                  "value": 6,
+                  "comparator": "=",
+                  "context": "st be <= 2.0%. total impurities must be <= 5.0%. \n6. microbial limits\n\ntotal aerobic microbial co"
+                },
+                {
+                  "raw": "<= 2000 c",
+                  "value": 2000,
+                  "comparator": "<=",
+                  "unit": "°C",
+                  "context": "l limits\n\ntotal aerobic microbial count must be fu/g.\n\ntest\n\nacceptance criteria\n\nmethod\n\nassay"
+                },
+                {
+                  "raw": "95.0%",
+                  "value": 95,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "cfu/g.\n\ntest\n\nacceptance criteria\n\nmethod\n\nassay 0% to 105.0%\n\nhplc at 1.0 ml/min\n\ndissolution\n\nn"
+                },
+                {
+                  "raw": "105.0%",
+                  "value": 105,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "st\n\nacceptance criteria\n\nmethod\n\nassay\n\n95.0% to %\n\nhplc at 1.0 ml/min\n\ndissolution\n\nnlt 80% in 3"
+                },
+                {
+                  "raw": "1.0 mL",
+                  "value": 1,
+                  "comparator": "=",
+                  "unit": "mL",
+                  "context": "riteria\n\nmethod\n\nassay\n\n95.0% to 105.0%\n\nhplc at l/min\n\ndissolution\n\nnlt 80% in 30 min\n\n50 rpm, 9"
+                },
+                {
+                  "raw": "80%",
+                  "value": 80,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "to 105.0%\n\nhplc at 1.0 ml/min\n\ndissolution\n\nnlt % in 30 min\n\n50 rpm, 900 ml\n\nmicrobial limits\n\n<"
+                },
+                {
+                  "raw": "30 min",
+                  "value": 30,
+                  "comparator": "=",
+                  "unit": "min",
+                  "context": ".0%\n\nhplc at 1.0 ml/min\n\ndissolution\n\nnlt 80% in n\n\n50 rpm, 900 ml\n\nmicrobial limits\n\n<= 2000 cfu"
+                },
+                {
+                  "raw": "50 rpm",
+                  "value": 50,
+                  "comparator": "=",
+                  "unit": "rpm",
+                  "context": "lc at 1.0 ml/min\n\ndissolution\n\nnlt 80% in 30 min pm, 900 ml\n\nmicrobial limits\n\n<= 2000 cfu/g\n\npla"
+                },
+                {
+                  "raw": "900 mL",
+                  "value": 900,
+                  "comparator": "=",
+                  "unit": "mL",
+                  "context": "ml/min\n\ndissolution\n\nnlt 80% in 30 min\n\n50 rpm, l\n\nmicrobial limits\n\n<= 2000 cfu/g\n\nplate count"
+                },
+                {
+                  "raw": "<= 2000 c",
+                  "value": 2000,
+                  "comparator": "<=",
+                  "unit": "°C",
+                  "context": "0% in 30 min\n\n50 rpm, 900 ml\n\nmicrobial limits\n\n fu/g\n\nplate count\ntest | acceptance criteria | m"
+                },
+                {
+                  "raw": "95.0%",
+                  "value": 95,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "ount\ntest | acceptance criteria | method\nassay | % to 105.0% | hplc at 1.0 ml/min\ndissolution | n"
+                },
+                {
+                  "raw": "105.0%",
+                  "value": 105,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "| acceptance criteria | method\nassay | 95.0% to % | hplc at 1.0 ml/min\ndissolution | nlt 80% in"
+                },
+                {
+                  "raw": "1.0 mL",
+                  "value": 1,
+                  "comparator": "=",
+                  "unit": "mL",
+                  "context": "teria | method\nassay | 95.0% to 105.0% | hplc at l/min\ndissolution | nlt 80% in 30 min | 50 rpm,"
+                },
+                {
+                  "raw": "80%",
+                  "value": 80,
+                  "comparator": "=",
+                  "unit": "%",
+                  "context": "to 105.0% | hplc at 1.0 ml/min\ndissolution | nlt % in 30 min | 50 rpm, 900 ml\nmicrobial limits |"
+                },
+                {
+                  "raw": "30 min",
+                  "value": 30,
+                  "comparator": "=",
+                  "unit": "min",
+                  "context": "0% | hplc at 1.0 ml/min\ndissolution | nlt 80% in n | 50 rpm, 900 ml\nmicrobial limits | <= 2000 cf"
+                },
+                {
+                  "raw": "50 rpm",
+                  "value": 50,
+                  "comparator": "=",
+                  "unit": "rpm",
+                  "context": "at 1.0 ml/min\ndissolution | nlt 80% in 30 min | m, 900 ml\nmicrobial limits | <= 2000 cfu/g | pla"
+                },
+                {
+                  "raw": "900 mL",
+                  "value": 900,
+                  "comparator": "=",
+                  "unit": "mL",
+                  "context": "ml/min\ndissolution | nlt 80% in 30 min | 50 rpm, l\nmicrobial limits | <= 2000 cfu/g | plate count"
+                },
+                {
+                  "raw": "<= 2000 c",
+                  "value": 2000,
+                  "comparator": "<=",
+                  "unit": "°C",
+                  "context": "% in 30 min | 50 rpm, 900 ml\nmicrobial limits | fu/g | plate count"
+                }
+              ],
+              "changed": [
+                {
+                  "reference": {
+                    "raw": "95.0%",
+                    "value": 95,
+                    "comparator": "=",
+                    "unit": "%",
+                    "context": "g 900 ml medium.\n\n4. assay\n\nassay result must be % to 105.0% of label claim.\n\n% assay = (as / ar)"
+                  },
+                  "generated": {
+                    "raw": "80.0%",
+                    "value": 80,
+                    "comparator": "=",
+                    "unit": "%",
+                    "context": "e is 73 ± 0.5°c.\n\n4. assay\n\nassay result must be % to 120.0% of label claim.\n\n% assay = (ar / as)"
+                  }
+                },
+                {
+                  "reference": {
+                    "raw": "105.0%",
+                    "value": 105,
+                    "comparator": "=",
+                    "unit": "%",
+                    "context": "medium.\n\n4. assay\n\nassay result must be 95.0% to % of label claim.\n\n% assay = (as / ar) x (cr / c"
+                  },
+                  "generated": {
+                    "raw": "120.0%",
+                    "value": 120,
+                    "comparator": "=",
+                    "unit": "%",
+                    "context": "0.5°c.\n\n4. assay\n\nassay result must be 80.0% to % of label claim.\n\n% assay = (ar / as) x (cs / c"
+                  }
+                }
+              ],
+              "extra": [
+                {
+                  "raw": "73 ± 0.5°C",
+                  "value": 73,
+                  "comparator": "=",
+                  "tolerance": 0.5,
+                  "unit": "°C",
+                  "context": "are supplied as a draft summary. temperature is c.\n\n4. assay\n\nassay result must be 80.0% to 120."
+                }
+              ],
+              "score": 0.1388888888888889,
+              "criticalIssues": []
+            }
+          },
+          "unitFidelity": {
+            "score": 0.1724137931034483,
+            "display": "17.2%",
+            "details": {
+              "referenceUnits": 29,
+              "matched": 5,
+              "score": 0.1724137931034483
+            }
+          },
+          "formulaFidelity": {
+            "score": 0,
+            "display": "0.0%",
+            "details": {
+              "referenceFormulas": 6,
+              "matched": [],
+              "missing": [
+                "Any individual impurity must be <= 2.0%.",
+                "Total impurities must be <= 5.0%.",
+                "Total aerobic microbial count must be <= 2000 cfu/g.",
+                "<= 2000 cfu/g",
+                "Microbial limits | <= 2000 cfu/g | Plate count"
+              ],
+              "changed": [
+                {
+                  "reference": "% Assay = (As / Ar) x (Cr / Cs) x 100",
+                  "generated": "% Assay = (Ar / As) x (Cs / Cr) x 100"
+                }
+              ],
+              "score": 0
+            }
+          },
+          "tableFidelity": {
+            "score": 0,
+            "display": "0.0%",
+            "details": {
+              "referenceTables": 1,
+              "generatedTables": 0,
+              "matchedTables": 0,
+              "score": 0,
+              "details": [
+                {
+                  "referenceIndex": 0,
+                  "rowScore": 0,
+                  "columnScore": 0,
+                  "headerSimilarity": 0,
+                  "cellSimilarity": 0,
+                  "numericScore": 0,
+                  "score": 0
+                }
+              ]
+            }
+          },
+          "completeness": {
+            "score": 0.2222222222222222,
+            "display": "22.2%",
+            "details": {
+              "referenceSentences": 9,
+              "coveredSentences": 2,
+              "potentiallyMissing": [
+                "DemoTab 500 mg tablets are white, round, film-coated tablets supplied in HDPE containers of 20 tablets.",
+                "The infrared spectrum of the sample corresponds to the reference standard.",
+                "The principal peak is observed at 221 nm.",
+                "NLT 80% of the labeled amount dissolves in 30 min at 50 rpm using 900 mL medium.",
+                "Any individual impurity must be <= 2.0%.",
+                "Total impurities must be <= 5.0%.",
+                "Total aerobic microbial count must be <= 2000 cfu/g."
+              ],
+              "potentiallyExtra": [
+                "DemoTab 500 mg tablets are supplied as a draft summary.",
+                "Temperature is 73 ± 0.5°C."
+              ],
+              "score": 0.2222222222222222
+            }
+          }
+        },
+        "sectionResults": [
+          {
+            "heading": "1. Description",
+            "generatedHeading": "1. Description",
+            "alignmentConfidence": 1,
+            "textSimilarity": 0.39999999999999997,
+            "numericFidelity": 0.5,
+            "unitFidelity": 0.5,
+            "completeness": 0
+          },
+          {
+            "heading": "2. Identification",
+            "alignmentConfidence": 0,
+            "textSimilarity": 0,
+            "numericFidelity": 0,
+            "unitFidelity": 0,
+            "completeness": 0
+          },
+          {
+            "heading": "3. Dissolution",
+            "alignmentConfidence": 0,
+            "textSimilarity": 0,
+            "numericFidelity": 0,
+            "unitFidelity": 0,
+            "completeness": 0
+          },
+          {
+            "heading": "4. Assay",
+            "generatedHeading": "4. Assay",
+            "alignmentConfidence": 1,
+            "textSimilarity": 0.7272727272727273,
+            "numericFidelity": 0.3333333333333333,
+            "unitFidelity": 0,
+            "completeness": 1
+          },
+          {
+            "heading": "5. Related Substances",
+            "alignmentConfidence": 0,
+            "textSimilarity": 0,
+            "numericFidelity": 0,
+            "unitFidelity": 0,
+            "completeness": 0
+          },
+          {
+            "heading": "6. Microbial Limits",
+            "alignmentConfidence": 0,
+            "textSimilarity": 0,
+            "numericFidelity": 0,
+            "unitFidelity": 0,
+            "completeness": 0
+          }
+        ],
+        "criticalIssues": [
+          {
+            "type": "missing_top_level_section",
+            "severity": "critical",
+            "message": "Missing top-level section \"2. Identification\".",
+            "reference": {
+              "heading": "2. Identification",
+              "level": 1,
+              "content": "The infrared spectrum of the sample corresponds to the reference standard. The principal peak is observed at 221 nm.",
+              "startIndex": 3,
+              "endIndex": 4
+            }
+          },
+          {
+            "type": "missing_top_level_section",
+            "severity": "critical",
+            "message": "Missing top-level section \"3. Dissolution\".",
+            "reference": {
+              "heading": "3. Dissolution",
+              "level": 1,
+              "content": "NLT 80% of the labeled amount dissolves in 30 min at 50 rpm using 900 mL medium.",
+              "startIndex": 5,
+              "endIndex": 6
+            }
+          },
+          {
+            "type": "missing_top_level_section",
+            "severity": "critical",
+            "message": "Missing top-level section \"5. Related Substances\".",
+            "reference": {
+              "heading": "5. Related Substances",
+              "level": 1,
+              "content": "Any individual impurity must be <= 2.0%. Total impurities must be <= 5.0%.",
+              "startIndex": 10,
+              "endIndex": 11
+            }
+          },
+          {
+            "type": "missing_top_level_section",
+            "severity": "critical",
+            "message": "Missing top-level section \"6. Microbial Limits\".",
+            "reference": {
+              "heading": "6. Microbial Limits",
+              "level": 1,
+              "content": "Total aerobic microbial count must be <= 2000 cfu/g.",
+              "startIndex": 12,
+              "endIndex": 13
+            }
+          }
+        ],
+        "potentiallyMissingContent": [
+          "DemoTab 500 mg tablets are white, round, film-coated tablets supplied in HDPE containers of 20 tablets.",
+          "The infrared spectrum of the sample corresponds to the reference standard.",
+          "The principal peak is observed at 221 nm.",
+          "NLT 80% of the labeled amount dissolves in 30 min at 50 rpm using 900 mL medium.",
+          "Any individual impurity must be <= 2.0%.",
+          "Total impurities must be <= 5.0%.",
+          "Total aerobic microbial count must be <= 2000 cfu/g."
+        ],
+        "potentiallyExtraContent": [
+          "DemoTab 500 mg tablets are supplied as a draft summary.",
+          "Temperature is 73 ± 0.5°C."
+        ]
+      }
+    },
+    {
+      "caseId": "case-pass",
+      "result": {
+        "runId": "doc-eval-1787573271745",
+        "timestamp": "2026-08-24T12:07:51.745Z",
+        "reference": {
+          "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\evals\\cases\\case-pass\\reference.docx",
+          "fileName": "reference.docx"
+        },
+        "generated": {
+          "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\evals\\cases\\case-pass\\generated.docx",
+          "fileName": "generated.docx"
+        },
+        "overallScore": 99.9,
+        "decision": "PASS",
+        "metrics": {
+          "characterLevenshtein": {
+            "score": 0.9941234084231146,
+            "display": "99.4%",
+            "details": {
+              "distance": 6,
+              "normalizedSimilarity": 0.9941234084231146
+            }
+          },
+          "wordLevenshtein": {
+            "score": 0.9942196531791907,
+            "display": "99.4%",
+            "details": {
+              "distance": 1,
+              "normalizedSimilarity": 0.9942196531791907
+            }
+          },
+          "rouge1": {
+            "score": 0.9942196531791907,
+            "display": "99.4%"
+          },
+          "rouge2": {
+            "score": 0.9883720930232558,
+            "display": "98.8%"
+          },
+          "rougeL": {
+            "score": 0.9942196531791907,
+            "display": "99.4%"
+          },
+          "tfidfCosine": {
+            "score": 0.99657673814187,
+            "display": "99.7%"
+          },
+          "sectionCoverage": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceCount": 6,
+              "generatedCount": 6,
+              "matched": 6,
+              "missing": [],
+              "extra": [],
+              "score": 1
+            }
+          },
+          "headingCoverage": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceCount": 6,
+              "generatedCount": 6,
+              "matched": 6,
+              "missing": [],
+              "extra": [],
+              "score": 1
+            }
+          },
+          "sectionOrder": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "matched": 6,
+              "inversions": 0,
+              "score": 1
+            }
+          },
+          "numericFidelity": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceFacts": 36,
+              "matched": 36,
+              "missing": [],
+              "changed": [],
+              "extra": [],
+              "score": 1,
+              "criticalIssues": []
+            }
+          },
+          "unitFidelity": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceUnits": 29,
+              "matched": 29,
+              "score": 1
+            }
+          },
+          "formulaFidelity": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceFormulas": 6,
+              "matched": [
+                "% Assay = (As / Ar) x (Cr / Cs) x 100",
+                "Any individual impurity must be <= 2.0%.",
+                "Total impurities must be <= 5.0%.",
+                "Total aerobic microbial count must be <= 2000 cfu/g.",
+                "<= 2000 cfu/g",
+                "Microbial limits | <= 2000 cfu/g | Plate count"
+              ],
+              "missing": [],
+              "changed": [],
+              "score": 1
+            }
+          },
+          "tableFidelity": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceTables": 1,
+              "generatedTables": 1,
+              "matchedTables": 1,
+              "score": 1,
+              "details": [
+                {
+                  "referenceIndex": 0,
+                  "generatedIndex": 0,
+                  "rowScore": 1,
+                  "columnScore": 1,
+                  "headerSimilarity": 1,
+                  "cellSimilarity": 1,
+                  "numericScore": 1,
+                  "score": 1
+                }
+              ]
+            }
+          },
+          "completeness": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceSentences": 9,
+              "coveredSentences": 9,
+              "potentiallyMissing": [],
+              "potentiallyExtra": [],
+              "score": 1
+            }
+          }
+        },
+        "sectionResults": [
+          {
+            "heading": "1. Description",
+            "generatedHeading": "1. Description",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "2. Identification",
+            "generatedHeading": "2. Identification",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "3. Dissolution",
+            "generatedHeading": "3. Dissolution",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "4. Assay",
+            "generatedHeading": "4. Assay",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "5. Related Substances",
+            "generatedHeading": "5. Related Substances",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "6. Microbial Limits",
+            "generatedHeading": "6. Microbial Limits",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          }
+        ],
+        "criticalIssues": [],
+        "potentiallyMissingContent": [],
+        "potentiallyExtraContent": []
+      }
+    },
+    {
+      "caseId": "case-review",
+      "result": {
+        "runId": "doc-eval-1787573271995",
+        "timestamp": "2026-08-24T12:07:51.995Z",
+        "reference": {
+          "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\evals\\cases\\case-review\\reference.docx",
+          "fileName": "reference.docx"
+        },
+        "generated": {
+          "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\evals\\cases\\case-review\\generated.docx",
+          "fileName": "generated.docx"
+        },
+        "overallScore": 99.2,
+        "decision": "REVIEW",
+        "metrics": {
+          "characterLevenshtein": {
+            "score": 0.9892787524366472,
+            "display": "98.9%",
+            "details": {
+              "distance": 11,
+              "normalizedSimilarity": 0.9892787524366472
+            }
+          },
+          "wordLevenshtein": {
+            "score": 0.9827586206896551,
+            "display": "98.3%",
+            "details": {
+              "distance": 3,
+              "normalizedSimilarity": 0.9827586206896551
+            }
+          },
+          "rouge1": {
+            "score": 0.9855907780979827,
+            "display": "98.6%"
+          },
+          "rouge2": {
+            "score": 0.9739130434782609,
+            "display": "97.4%"
+          },
+          "rougeL": {
+            "score": 0.9855907780979827,
+            "display": "98.6%"
+          },
+          "tfidfCosine": {
+            "score": 0.9908500966434935,
+            "display": "99.1%"
+          },
+          "sectionCoverage": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceCount": 6,
+              "generatedCount": 6,
+              "matched": 6,
+              "missing": [],
+              "extra": [],
+              "score": 1
+            }
+          },
+          "headingCoverage": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceCount": 6,
+              "generatedCount": 6,
+              "matched": 6,
+              "missing": [],
+              "extra": [],
+              "score": 1
+            }
+          },
+          "sectionOrder": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "matched": 6,
+              "inversions": 0,
+              "score": 1
+            }
+          },
+          "numericFidelity": {
+            "score": 0.9722222222222222,
+            "display": "97.2%",
+            "details": {
+              "referenceFacts": 36,
+              "matched": 35,
+              "missing": [],
+              "changed": [
+                {
+                  "reference": {
+                    "raw": "<= 2.0%",
+                    "value": 2,
+                    "comparator": "<=",
+                    "unit": "%",
+                    "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+                  },
+                  "generated": {
+                    "raw": ">= 2.0%",
+                    "value": 2,
+                    "comparator": ">=",
+                    "unit": "%",
+                    "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+                  }
+                }
+              ],
+              "extra": [],
+              "score": 0.9722222222222222,
+              "criticalIssues": [
+                {
+                  "type": "changed_comparator",
+                  "severity": "critical",
+                  "message": "Comparator changed near \"<= 2.0%\" -> \">= 2.0%\".",
+                  "reference": {
+                    "raw": "<= 2.0%",
+                    "value": 2,
+                    "comparator": "<=",
+                    "unit": "%",
+                    "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+                  },
+                  "generated": {
+                    "raw": ">= 2.0%",
+                    "value": 2,
+                    "comparator": ">=",
+                    "unit": "%",
+                    "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+                  }
+                }
+              ]
+            }
+          },
+          "unitFidelity": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceUnits": 29,
+              "matched": 29,
+              "score": 1
+            }
+          },
+          "formulaFidelity": {
+            "score": 0.8333333333333334,
+            "display": "83.3%",
+            "details": {
+              "referenceFormulas": 6,
+              "matched": [
+                "% Assay = (As / Ar) x (Cr / Cs) x 100",
+                "Total impurities must be <= 5.0%.",
+                "Total aerobic microbial count must be <= 2000 cfu/g.",
+                "<= 2000 cfu/g",
+                "Microbial limits | <= 2000 cfu/g | Plate count"
+              ],
+              "missing": [
+                "Any individual impurity must be <= 2.0%."
+              ],
+              "changed": [],
+              "score": 0.8333333333333334
+            }
+          },
+          "tableFidelity": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceTables": 1,
+              "generatedTables": 1,
+              "matchedTables": 1,
+              "score": 1,
+              "details": [
+                {
+                  "referenceIndex": 0,
+                  "generatedIndex": 0,
+                  "rowScore": 1,
+                  "columnScore": 1,
+                  "headerSimilarity": 1,
+                  "cellSimilarity": 1,
+                  "numericScore": 1,
+                  "score": 1
+                }
+              ]
+            }
+          },
+          "completeness": {
+            "score": 1,
+            "display": "100.0%",
+            "details": {
+              "referenceSentences": 9,
+              "coveredSentences": 9,
+              "potentiallyMissing": [],
+              "potentiallyExtra": [],
+              "score": 1
+            }
+          }
+        },
+        "sectionResults": [
+          {
+            "heading": "1. Description",
+            "generatedHeading": "1. Description",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "2. Identification",
+            "generatedHeading": "2. Identification",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "3. Dissolution",
+            "generatedHeading": "3. Dissolution",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "4. Assay",
+            "generatedHeading": "4. Assay",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "5. Related Substances",
+            "generatedHeading": "5. Related Substances",
+            "alignmentConfidence": 1,
+            "textSimilarity": 0.9230769230769231,
+            "numericFidelity": 0.5,
+            "unitFidelity": 1,
+            "completeness": 1
+          },
+          {
+            "heading": "6. Microbial Limits",
+            "generatedHeading": "6. Microbial Limits",
+            "alignmentConfidence": 1,
+            "textSimilarity": 1,
+            "numericFidelity": 1,
+            "unitFidelity": 1,
+            "completeness": 1
+          }
+        ],
+        "criticalIssues": [
+          {
+            "type": "changed_comparator",
+            "severity": "critical",
+            "message": "Comparator changed near \"<= 2.0%\" -> \">= 2.0%\".",
+            "reference": {
+              "raw": "<= 2.0%",
+              "value": 2,
+              "comparator": "<=",
+              "unit": "%",
+              "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+            },
+            "generated": {
+              "raw": ">= 2.0%",
+              "value": 2,
+              "comparator": ">=",
+              "unit": "%",
+              "context": "ted substances\n\nany individual impurity must be. total impurities must be <= 5.0%.\n\n6. microbia"
+            }
+          }
+        ],
+        "potentiallyMissingContent": [],
+        "potentiallyExtraContent": []
+      }
+    }
+  ]
+}

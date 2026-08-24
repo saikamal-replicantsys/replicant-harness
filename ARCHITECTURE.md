@@ -107,3 +107,49 @@ The harness adds friction to simple model calls, but it makes failure modes visi
 - No web UI.
 - No general-purpose agent framework.
 - No replacement for RepliSense application architecture.
+
+## 20. Offline Document Evaluation Harness
+
+The POC now includes a working local DOCX comparison harness. It remains deterministic and offline: no provider API, LLM judge, vector database, or cloud service is required.
+
+```text
+Reference DOCX
+      |
+      +--------------+
+      v              v
+ Extraction       Generated DOCX
+      |              |
+      +------+-------+
+             v
+       Normalization
+             |
+             v
+       Section Alignment
+             |
+             v
+          Sensors
+             |
+    +--------+---------+
+    v        v         v
+  Text    Structure   Facts
+    |        |         |
+    +--------+---------+
+             v
+       Scoring Engine
+             |
+             v
+      PASS/REVIEW/FAIL
+             |
+             v
+      JSON + Markdown
+```
+
+The same harness concepts remain visible:
+
+- Contracts: TypeScript result and extracted-document shapes.
+- Sensors: text similarity, structure, factual fidelity, tables, and completeness.
+- Policies: centralized scoring weights, thresholds, and critical mismatch rules.
+- Traces/evaluations: machine-readable reports and fixture-driven tests.
+- Reports: `reports/latest.json` and `reports/latest.md`.
+
+The extractor uses DOCX text extraction plus direct OOXML inspection for headings and tables. V1 evaluates content fidelity rather than Word layout fidelity.

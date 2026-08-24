@@ -204,3 +204,52 @@ npm run demo
 ```
 
 The runner reads predefined files only. It does not call a provider, run an evaluator model, or implement a framework.
+
+## Offline Document Evaluation
+
+The harness can now compare a generated DOCX against a reference DOCX using deterministic offline sensors.
+
+### Quick Start
+
+1. Place files in:
+
+   ```text
+   eval-input/reference.docx
+   eval-input/generated.docx
+   ```
+
+2. Run:
+
+   ```bash
+   npm run evaluate
+   ```
+
+3. View:
+
+   ```text
+   reports/latest.md
+   reports/latest.json
+   ```
+
+You can also pass explicit paths:
+
+```bash
+npm run evaluate -- ./some/reference.docx ./some/generated.docx
+```
+
+The evaluator extracts DOCX text, headings, sections, and tables, normalizes the content, aligns sections, runs deterministic sensors, applies centralized scoring weights, and writes JSON plus Markdown reports.
+
+Important interpretation notes:
+
+- Levenshtein is not the final quality score.
+- Paraphrasing can reduce raw text similarity even when content is acceptable.
+- Structural fidelity, numeric fidelity, unit fidelity, formula fidelity, table fidelity, and completeness carry meaningful weight.
+- V1 reports "potentially unsupported / extra content"; it does not claim true hallucination detection.
+- Semantic embeddings and LLM judges are intentionally future work.
+
+To generate synthetic local demo DOCX fixtures:
+
+```bash
+npm run fixtures
+npm run evaluate
+```

@@ -1,0 +1,213 @@
+{
+  "runId": "doc-eval-1787573271379",
+  "timestamp": "2026-08-24T12:07:51.379Z",
+  "reference": {
+    "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\eval-input\\reference.docx",
+    "fileName": "reference.docx"
+  },
+  "generated": {
+    "path": "C:\\Users\\Design2\\Desktop\\replisense\\replicant-harness-demo\\eval-input\\generated.docx",
+    "fileName": "generated.docx"
+  },
+  "overallScore": 99.9,
+  "decision": "PASS",
+  "metrics": {
+    "characterLevenshtein": {
+      "score": 0.9941234084231146,
+      "display": "99.4%",
+      "details": {
+        "distance": 6,
+        "normalizedSimilarity": 0.9941234084231146
+      }
+    },
+    "wordLevenshtein": {
+      "score": 0.9942196531791907,
+      "display": "99.4%",
+      "details": {
+        "distance": 1,
+        "normalizedSimilarity": 0.9942196531791907
+      }
+    },
+    "rouge1": {
+      "score": 0.9942196531791907,
+      "display": "99.4%"
+    },
+    "rouge2": {
+      "score": 0.9883720930232558,
+      "display": "98.8%"
+    },
+    "rougeL": {
+      "score": 0.9942196531791907,
+      "display": "99.4%"
+    },
+    "tfidfCosine": {
+      "score": 0.99657673814187,
+      "display": "99.7%"
+    },
+    "sectionCoverage": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceCount": 6,
+        "generatedCount": 6,
+        "matched": 6,
+        "missing": [],
+        "extra": [],
+        "score": 1
+      }
+    },
+    "headingCoverage": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceCount": 6,
+        "generatedCount": 6,
+        "matched": 6,
+        "missing": [],
+        "extra": [],
+        "score": 1
+      }
+    },
+    "sectionOrder": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "matched": 6,
+        "inversions": 0,
+        "score": 1
+      }
+    },
+    "numericFidelity": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceFacts": 36,
+        "matched": 36,
+        "missing": [],
+        "changed": [],
+        "extra": [],
+        "score": 1,
+        "criticalIssues": []
+      }
+    },
+    "unitFidelity": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceUnits": 29,
+        "matched": 29,
+        "score": 1
+      }
+    },
+    "formulaFidelity": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceFormulas": 6,
+        "matched": [
+          "% Assay = (As / Ar) x (Cr / Cs) x 100",
+          "Any individual impurity must be <= 2.0%.",
+          "Total impurities must be <= 5.0%.",
+          "Total aerobic microbial count must be <= 2000 cfu/g.",
+          "<= 2000 cfu/g",
+          "Microbial limits | <= 2000 cfu/g | Plate count"
+        ],
+        "missing": [],
+        "changed": [],
+        "score": 1
+      }
+    },
+    "tableFidelity": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceTables": 1,
+        "generatedTables": 1,
+        "matchedTables": 1,
+        "score": 1,
+        "details": [
+          {
+            "referenceIndex": 0,
+            "generatedIndex": 0,
+            "rowScore": 1,
+            "columnScore": 1,
+            "headerSimilarity": 1,
+            "cellSimilarity": 1,
+            "numericScore": 1,
+            "score": 1
+          }
+        ]
+      }
+    },
+    "completeness": {
+      "score": 1,
+      "display": "100.0%",
+      "details": {
+        "referenceSentences": 9,
+        "coveredSentences": 9,
+        "potentiallyMissing": [],
+        "potentiallyExtra": [],
+        "score": 1
+      }
+    }
+  },
+  "sectionResults": [
+    {
+      "heading": "1. Description",
+      "generatedHeading": "1. Description",
+      "alignmentConfidence": 1,
+      "textSimilarity": 1,
+      "numericFidelity": 1,
+      "unitFidelity": 1,
+      "completeness": 1
+    },
+    {
+      "heading": "2. Identification",
+      "generatedHeading": "2. Identification",
+      "alignmentConfidence": 1,
+      "textSimilarity": 1,
+      "numericFidelity": 1,
+      "unitFidelity": 1,
+      "completeness": 1
+    },
+    {
+      "heading": "3. Dissolution",
+      "generatedHeading": "3. Dissolution",
+      "alignmentConfidence": 1,
+      "textSimilarity": 1,
+      "numericFidelity": 1,
+      "unitFidelity": 1,
+      "completeness": 1
+    },
+    {
+      "heading": "4. Assay",
+      "generatedHeading": "4. Assay",
+      "alignmentConfidence": 1,
+      "textSimilarity": 1,
+      "numericFidelity": 1,
+      "unitFidelity": 1,
+      "completeness": 1
+    },
+    {
+      "heading": "5. Related Substances",
+      "generatedHeading": "5. Related Substances",
+      "alignmentConfidence": 1,
+      "textSimilarity": 1,
+      "numericFidelity": 1,
+      "unitFidelity": 1,
+      "completeness": 1
+    },
+    {
+      "heading": "6. Microbial Limits",
+      "generatedHeading": "6. Microbial Limits",
+      "alignmentConfidence": 1,
+      "textSimilarity": 1,
+      "numericFidelity": 1,
+      "unitFidelity": 1,
+      "completeness": 1
+    }
+  ],
+  "criticalIssues": [],
+  "potentiallyMissingContent": [],
+  "potentiallyExtraContent": []
+}

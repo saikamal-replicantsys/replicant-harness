@@ -7,3 +7,5 @@ Thumbs.db
 coverage/
 dist/
 DEMO.md
+/reference.docx
+/generated.docx
