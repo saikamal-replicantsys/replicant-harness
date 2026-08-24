@@ -14,4 +14,4 @@ For RepliSense, the model may draft compact blocks. It does not own the internal
 
 Prompts steer behavior, but they do not prove the output is acceptable. A prompt can ask for citations. A sensor can verify whether citations exist and whether they refer to supplied chunks.
 
-Reliable agentic systems need surrounding infrastructure because failures are operational, not just linguistic.
+Reliable agentic systems need surrounding infrastructure because failures are operational.
