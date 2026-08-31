@@ -22,7 +22,13 @@
     "url": "https://github.com/saikamal-replicantsys/replicant-harness.git"
   },
   "scripts": {
-    "demo": "node tools/demo-runner.mjs",
+    "concept-demo": "node tools/demo-runner.mjs",
+    "demo": "tsx src/cli/demo.ts",
+    "cli": "tsx src/cli/index.ts",
+    "rules": "tsx src/cli/generate-rules.ts",
+    "approve-rules": "tsx src/cli/approve-rules.ts",
+    "qc": "tsx src/cli/run-qc.ts",
+    "lineage": "tsx src/cli/lineage.ts",
     "evaluate": "tsx tools/evaluate-documents.ts",
     "evaluate:batch": "tsx tools/evaluate-batch.ts",
     "fixtures": "tsx tools/create-demo-fixtures.ts",
@@ -36,7 +42,9 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@google/genai": "^2.19.0",
     "docx": "^9.7.1",
+    "dotenv": "^17.4.2",
     "fast-xml-parser": "^5.11.0",
     "jszip": "^3.10.1",
     "mammoth": "^1.12.1"

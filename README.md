@@ -253,3 +253,133 @@ To generate synthetic local demo DOCX fixtures:
 npm run fixtures
 npm run evaluate
 ```
+
+# First Runnable Workflow: SOP Compliance QC
+
+This repository now includes a local SOP-driven validation workflow for Markdown documents.
+
+It demonstrates the production architecture RepliSense is considering:
+
+- SOP documents become candidate rulesets.
+- Gemini produces candidate rules, not authoritative rules.
+- Deterministic sensors validate schema, source references, source text, modality, duplicates, and approval state.
+- Human approval is mandatory before rules can enter QC.
+- QC uses approved rules only.
+- Candidate findings are validated before becoming accepted findings.
+- Every accepted finding resolves through the knowledge graph back to the approved rule, ruleset, SOP document, SOP evidence block, target document, and target block.
+
+```text
+SOP Markdown
+     |
+Document Adapter
+     |
+Normalized SOP
+     |
+Gemini Rule Generator
+     |
+Rule Sensors
+     |
+Candidate Rules
+     |
+Human Approval
+     |
+Approved Rules
+     |
+Knowledge Graph
+     |
+Rule Retrieval
+     ^
+Target Markdown
+     |
+Gemini QC
+     |
+Candidate Findings
+     |
+Finding Sensors
+     |
+Groundedness Evaluator
+     |
+Provenance Validation
+     |
+Accepted Findings
+     |
+Client Report / QC Adapter
+```
+
+## SOP QC Prerequisites
+
+For real Gemini mode, create a local `.env` file:
+
+```text
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+`.env` is ignored by git. Never commit the key.
+
+The demo and tests use `MockAIProvider` and do not require Gemini.
+
+## SOP QC Commands
+
+Generate candidate rules:
+
+```bash
+npm run rules -- data/sop/document-control-sop.md
+```
+
+Approve rules manually:
+
+```bash
+npm run approve-rules -- RULESET-SOP-DEMO-001
+```
+
+Approve all for fixture/demo use only:
+
+```bash
+npm run approve-rules -- RULESET-SOP-DEMO-001 -- --all
+```
+
+Run QC:
+
+```bash
+npm run qc -- data/target/batch-record.md
+```
+
+Run complete fixture demo without Gemini:
+
+```bash
+npm run demo
+```
+
+Inspect lineage:
+
+```bash
+npm run lineage -- QC-F-001
+```
+
+## SOP QC Outputs
+
+Runtime outputs are written under `data/`:
+
+- `data/normalized/`
+- `data/rulesets/generated/`
+- `data/rulesets/approved/`
+- `data/findings/`
+- `data/knowledge/graph.json`
+- `data/reports/`
+- `data/traces/`
+
+The conceptual old-QC adapter writes `data/findings/<target>.old-qc.json` and includes accepted findings only.
+
+## SOP QC Limitations
+
+- Markdown-only input.
+- No OCR.
+- No page-coordinate mapping.
+- No vector retrieval.
+- No production authorization.
+- No tenant isolation implementation.
+- No production data persistence.
+- Semantic evaluators use AI in real mode and are therefore probabilistic.
+- Human approval of rules remains mandatory.
+- This POC must not be used as an unattended regulatory decision system.

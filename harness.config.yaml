@@ -60,3 +60,26 @@ evaluation:
   reports:
     json: reports/latest.json
     markdown: reports/latest.md
+
+workflows:
+  sopComplianceQc:
+    provider:
+      preferred: gemini
+    guides:
+      ruleGeneration: guides/sop-rule-generation.md
+      qc: guides/sop-compliance-qc.md
+    ruleGeneration:
+      groundednessThreshold: 0.85
+    qc:
+      groundednessThreshold: 0.85
+    approval:
+      required: true
+    retrieval:
+      strategy: simple
+    limits:
+      maxRulesPerQcRequest: 100
+      maxAttempts: 2
+    output:
+      clientReport: true
+      oldQcAdapter: true
+      trace: true

@@ -10,6 +10,6 @@
     "outDir": "dist",
     "types": ["node"]
   },
-  "include": ["contracts/**/*.ts", "tools/**/*.ts", "sensors/**/*.ts", "scoring/**/*.ts", "tests/**/*.ts"],
+  "include": ["contracts/**/*.ts", "tools/**/*.ts", "sensors/**/*.ts", "scoring/**/*.ts", "src/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

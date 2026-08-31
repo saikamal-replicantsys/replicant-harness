@@ -153,3 +153,47 @@ The same harness concepts remain visible:
 - Reports: `reports/latest.json` and `reports/latest.md`.
 
 The extractor uses DOCX text extraction plus direct OOXML inspection for headings and tables. V1 evaluates content fidelity rather than Word layout fidelity.
+
+## 21. SOP Compliance QC Workflow
+
+The first AI-backed runnable workflow is SOP-driven compliance QC for Markdown documents.
+
+The workflow keeps the core harness boundary intact:
+
+- Gemini generates candidate rules and candidate findings.
+- Deterministic sensors validate contracts, source references, approval state, and provenance.
+- Human approval is required before generated rules can be used for QC.
+- The knowledge graph records identity and lineage, not semantic reasoning.
+- Accepted findings must resolve to both SOP evidence and target evidence.
+
+```text
+SOP Markdown
+     |
+Document Adapter
+     |
+Normalized SOP
+     |
+AIProvider
+     |
+GeminiProvider
+     |
+Candidate Rules
+     |
+Rule Sensors
+     |
+Manual Approval
+     |
+Approved Rules
+     |
+Simple Rule Retrieval
+     |
+Target Markdown -> AIProvider -> Candidate Findings
+     |
+Finding Sensors + Groundedness Evaluation
+     |
+Provenance Graph
+     |
+Client Report + Conceptual Old-QC Adapter + Trace
+```
+
+Future document formats should be added as new `DocumentAdapter` implementations. The workflow should continue to consume `NormalizedDocument`, not raw files.

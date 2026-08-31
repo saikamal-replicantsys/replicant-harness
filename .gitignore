@@ -4,8 +4,17 @@ Thumbs.db
 *.log
 .env
 .env.*
+!.env.example
 coverage/
 dist/
 DEMO.md
 /reference.docx
 /generated.docx
+.tmp/
+data/normalized/
+data/rulesets/generated/*.json
+data/rulesets/approved/*.json
+data/findings/*.json
+data/knowledge/*.json
+data/reports/*.md
+data/traces/*.json

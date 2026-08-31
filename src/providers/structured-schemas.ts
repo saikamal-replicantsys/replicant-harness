@@ -1,0 +1,97 @@
+export const ruleCandidatesSchema = {
+  type: "object",
+  properties: {
+    rules: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          ruleId: { type: "string" },
+          rulesetId: { type: "string" },
+          title: { type: "string" },
+          statement: { type: "string" },
+          description: { type: "string" },
+          ruleType: { type: "string" },
+          severity: { type: "string" },
+          applicability: {
+            type: "object",
+            properties: {
+              documentTypes: { type: "array", items: { type: "string" } },
+              conditions: { type: "array", items: { type: "string" } }
+            },
+            required: ["documentTypes", "conditions"]
+          },
+          requirement: { type: "object" },
+          source: {
+            type: "object",
+            properties: {
+              documentId: { type: "string" },
+              sourceBlockIds: { type: "array", items: { type: "string" } },
+              section: { type: "string" },
+              sourceText: { type: "string" }
+            },
+            required: ["documentId", "sourceBlockIds", "sourceText"]
+          },
+          status: { type: "string" },
+          generation: { type: "object" }
+        },
+        required: ["ruleId", "rulesetId", "title", "statement", "description", "ruleType", "severity", "applicability", "requirement", "source", "status", "generation"]
+      }
+    }
+  },
+  required: ["rules"]
+} as const;
+
+export const groundingSchema = {
+  type: "object",
+  properties: {
+    supported: { type: "boolean" },
+    modalityPreserved: { type: "boolean" },
+    scopePreserved: { type: "boolean" },
+    unsupportedAdditions: { type: "array", items: { type: "string" } },
+    score: { type: "number" },
+    reason: { type: "string" }
+  },
+  required: ["supported", "modalityPreserved", "scopePreserved", "unsupportedAdditions", "score", "reason"]
+} as const;
+
+export const findingsSchema = {
+  type: "object",
+  properties: {
+    findings: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          findingId: { type: "string" },
+          runId: { type: "string" },
+          status: { type: "string" },
+          decision: { type: "string" },
+          severity: { type: "string" },
+          title: { type: "string" },
+          description: { type: "string" },
+          target: { type: "object" },
+          rule: { type: "object" },
+          sopSource: { type: "object" },
+          explanation: { type: "object" },
+          evaluation: { type: "object" }
+        },
+        required: ["findingId", "runId", "status", "decision", "severity", "title", "description", "target", "rule", "sopSource", "explanation", "evaluation"]
+      }
+    }
+  },
+  required: ["findings"]
+} as const;
+
+export const findingGroundingSchema = {
+  type: "object",
+  properties: {
+    supported: { type: "boolean" },
+    ruleAppliedCorrectly: { type: "boolean" },
+    targetEvidenceSupportsFinding: { type: "boolean" },
+    contradictions: { type: "array", items: { type: "string" } },
+    score: { type: "number" },
+    reason: { type: "string" }
+  },
+  required: ["supported", "ruleAppliedCorrectly", "targetEvidenceSupportsFinding", "contradictions", "score", "reason"]
+} as const;
