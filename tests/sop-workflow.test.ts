@@ -112,6 +112,15 @@ test("finding with invalid target block is rejected", async () => {
   assert.equal(result?.finding.decision, "REJECTED");
 });
 
+test("finding missing target block ids is rejected without crashing", async () => {
+  const target = await adapter.parse("data/demo/target/batch-record.md", "target");
+  const finding = sampleFinding() as unknown as QcFinding;
+  delete (finding.target as Partial<QcFinding["target"]>).blockIds;
+  const [result] = validateFindings([finding], [sampleRule("approved")], target);
+  assert.equal(result?.finding.decision, "REJECTED");
+  assert.deepEqual(result?.finding.target.blockIds, []);
+});
+
 test("duplicate findings can be detected", async () => {
   const target = await adapter.parse("data/demo/target/batch-record.md", "target");
   const results = validateFindings([sampleFinding(), sampleFinding()], [sampleRule("approved")], target);
