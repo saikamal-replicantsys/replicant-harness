@@ -7,7 +7,7 @@ export class GeminiProvider implements AIProvider {
   readonly model: string;
   private readonly client: GoogleGenAI;
 
-  constructor(apiKey = process.env.GEMINI_API_KEY, model = process.env.GEMINI_MODEL || "gemini-2.5-flash") {
+  constructor(apiKey = process.env.GEMINI_API_KEY, model = process.env.GEMINI_MODEL || "gemini-3.6-flash") {
     if (!apiKey) {
       throw new ProviderError("GEMINI_API_KEY is required for real Gemini mode. Demo/tests use MockAIProvider.", "missing_api_key");
     }

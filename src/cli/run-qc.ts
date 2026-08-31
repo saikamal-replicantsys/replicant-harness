@@ -15,6 +15,7 @@ async function main(): Promise<void> {
   console.log(`Accepted findings: ${result.accepted.length}`);
   console.log(`Human review findings: ${result.humanReview.length}`);
   console.log(`Rejected findings: ${result.rejected.length}`);
+  console.log(`Final decision: ${result.finalDecision}`);
   console.log(`Findings JSON: ${result.findingsPath}`);
   console.log(`Client report: ${result.reportPath}`);
   console.log(`Old QC adapter: ${result.oldQcPath}`);

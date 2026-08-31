@@ -39,7 +39,7 @@ function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: numb
     runId,
     status: "open",
     decision: raw.decision === "ACCEPTED" || raw.decision === "REJECTED" ? raw.decision : "HUMAN_REVIEW",
-    severity: raw.severity === "critical" || raw.severity === "major" || raw.severity === "minor" ? raw.severity : "minor",
+    severity: raw.severity === "critical" || raw.severity === "major" || raw.severity === "minor" || raw.severity === "informational" ? raw.severity : "minor",
     title: typeof raw.title === "string" ? raw.title : "Malformed candidate finding",
     description: typeof raw.description === "string" ? raw.description : "The provider returned an incomplete finding object.",
     target: {
@@ -77,6 +77,13 @@ function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: numb
   };
 }
 
+function qcFinalDecision(params: { accepted: QcFinding[]; humanReview: QcFinding[]; rejected: QcFinding[] }): "ACCEPT" | "HUMAN_REVIEW" | "REJECT" {
+  if (params.humanReview.length > 0) return "HUMAN_REVIEW";
+  if (params.accepted.length > 0) return "ACCEPT";
+  if (params.rejected.length > 0) return "REJECT";
+  return "ACCEPT";
+}
+
 export async function runQc(targetPath: string, provider: AIProvider, scope?: ClientScope): Promise<QcRunResult> {
   if (scope) assertPathInside(targetPath, scope.normalizedDir);
   const startedAt = new Date().toISOString();
@@ -94,13 +101,25 @@ export async function runQc(targetPath: string, provider: AIProvider, scope?: Cl
     guideVersion: "1.0.0",
     schemaName: "qc-finding-candidates",
     schema: findingsSchema,
-    system: "Generate candidate QC findings using only supplied approved rules. Return structured JSON only.",
-    prompt: JSON.stringify({ targetDocument: target, approvedRules: retrieved.map((item) => item.rule) })
+    system: [
+      "Generate candidate QC findings using only supplied approved rules.",
+      "Every finding must cite an approved rule by exact ruleId and rulesetId.",
+      "Every finding must cite target.blockIds from the supplied targetDocument blocks.",
+      "Every finding must cite sopSource.sourceBlockIds from the selected approved rule.",
+      "If you cannot cite both SOP and target block IDs, do not create that finding.",
+      "Return structured JSON only."
+    ].join(" "),
+    prompt: JSON.stringify({
+      instruction: "Use exact IDs from the supplied JSON. Do not invent IDs. Do not omit provenance arrays.",
+      targetDocument: target,
+      approvedRules: retrieved.map((item) => item.rule)
+    })
   });
 
   const graph = new GraphStore(scope?.graphPath);
   await graph.addDocument(target);
-  const findings = response.parsed.findings.map((finding, index) => coerceFinding(finding, runId, index));
+  const candidateFindings = Array.isArray(response.parsed.findings) ? response.parsed.findings : [];
+  const findings = candidateFindings.map((finding, index) => coerceFinding(finding, runId, index));
 
   for (const finding of findings) {
     const rule = approvedRules.find((candidate) => candidate.ruleId === finding.rule.ruleId);
@@ -119,6 +138,7 @@ export async function runQc(targetPath: string, provider: AIProvider, scope?: Cl
   const accepted = finalFindings.filter((finding) => finding.decision === "ACCEPTED");
   const humanReview = finalFindings.filter((finding) => finding.decision === "HUMAN_REVIEW");
   const rejected = finalFindings.filter((finding) => finding.decision === "REJECTED");
+  const finalDecision = qcFinalDecision({ accepted, humanReview, rejected });
   const baseName = path.basename(targetPath, path.extname(targetPath));
   const findingsDir = scope?.findingsDir ?? "data/findings";
   const reportsDir = scope?.reportsDir ?? "data/reports";
@@ -131,8 +151,10 @@ export async function runQc(targetPath: string, provider: AIProvider, scope?: Cl
     targetTitle: target.title,
     rulesetsLoaded: new Set(approvedRules.map((rule) => rule.rulesetId)).size,
     rulesEvaluated: retrieved.length,
+    finalDecision,
     accepted,
     humanReview,
+    rejected,
     approvedRules
   }), "utf8");
 
@@ -154,8 +176,8 @@ export async function runQc(targetPath: string, provider: AIProvider, scope?: Cl
     sensors: validations.flatMap((validation) => validation.sensors),
     evidenceIds: finalFindings.flatMap((finding) => [...finding.sopSource.sourceBlockIds, ...finding.target.blockIds]),
     ruleIds: finalFindings.map((finding) => finding.rule.ruleId),
-    finalDecision: humanReview.length > 0 ? "HUMAN_REVIEW" : "ACCEPT"
+    finalDecision
   }, scope?.tracesDir);
 
-  return { runId, findings: finalFindings, accepted, humanReview, rejected, reportPath, findingsPath, oldQcPath, tracePath };
+  return { runId, finalDecision, findings: finalFindings, accepted, humanReview, rejected, reportPath, findingsPath, oldQcPath, tracePath };
 }

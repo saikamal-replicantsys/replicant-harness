@@ -17,6 +17,7 @@ export interface RuleGenerationResult {
 
 export interface QcRunResult {
   runId: string;
+  finalDecision: "ACCEPT" | "HUMAN_REVIEW" | "REJECT";
   findings: QcFinding[];
   accepted: QcFinding[];
   humanReview: QcFinding[];

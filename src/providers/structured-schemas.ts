@@ -70,11 +70,58 @@ export const findingsSchema = {
           severity: { type: "string" },
           title: { type: "string" },
           description: { type: "string" },
-          target: { type: "object" },
-          rule: { type: "object" },
-          sopSource: { type: "object" },
-          explanation: { type: "object" },
-          evaluation: { type: "object" }
+          target: {
+            type: "object",
+            properties: {
+              documentId: { type: "string" },
+              blockIds: { type: "array", items: { type: "string" } },
+              section: { type: "string" },
+              observedText: { type: "string" }
+            },
+            required: ["documentId", "blockIds", "observedText"]
+          },
+          rule: {
+            type: "object",
+            properties: {
+              ruleId: { type: "string" },
+              rulesetId: { type: "string" },
+              title: { type: "string" }
+            },
+            required: ["ruleId", "rulesetId", "title"]
+          },
+          sopSource: {
+            type: "object",
+            properties: {
+              documentId: { type: "string" },
+              documentName: { type: "string" },
+              section: { type: "string" },
+              sourceBlockIds: { type: "array", items: { type: "string" } },
+              sourceText: { type: "string" }
+            },
+            required: ["documentId", "documentName", "sourceBlockIds"]
+          },
+          explanation: {
+            type: "object",
+            properties: {
+              expected: { type: "string" },
+              observed: { type: "string" },
+              reason: { type: "string" }
+            },
+            required: ["expected", "observed", "reason"]
+          },
+          evaluation: {
+            type: "object",
+            properties: {
+              ruleExists: { type: "boolean" },
+              ruleApproved: { type: "boolean" },
+              ruleGrounded: { type: "boolean" },
+              findingGrounded: { type: "boolean" },
+              provenanceValid: { type: "boolean" },
+              score: { type: "number" },
+              reason: { type: "string" }
+            },
+            required: ["ruleExists", "ruleApproved", "ruleGrounded", "findingGrounded", "provenanceValid", "score"]
+          }
         },
         required: ["findingId", "runId", "status", "decision", "severity", "title", "description", "target", "rule", "sopSource", "explanation", "evaluation"]
       }

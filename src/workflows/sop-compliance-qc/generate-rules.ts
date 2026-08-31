@@ -49,7 +49,8 @@ export async function generateRules(sopPath: string, provider: AIProvider, scope
   };
 
   for (const rule of ruleset.rules) {
-    const evidence = sop.blocks.filter((block) => rule.source.sourceBlockIds.includes(block.blockId));
+    const sourceBlockIds = Array.isArray(rule.source?.sourceBlockIds) ? rule.source.sourceBlockIds : [];
+    const evidence = sop.blocks.filter((block) => sourceBlockIds.includes(block.blockId));
     rule.validation = { ...(rule.validation ?? { schemaValid: false, sourcesValid: false, sourceTextValid: false, modalityValid: false, duplicate: false, messages: [] }), grounding: await evaluateRuleGrounding(provider, rule, evidence) };
   }
 

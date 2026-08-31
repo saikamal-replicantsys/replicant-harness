@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import path from "node:path";
+import { resolveClientScope } from "../src/client/client-scope.js";
 import { MarkdownDocumentAdapter } from "../src/documents/markdown.adapter.js";
 import { validateRuleset, assertRuleUsableForQc } from "../src/harness/sensors/rule-sensors.js";
 import { validateFindings } from "../src/harness/sensors/finding-sensors.js";
@@ -9,8 +11,23 @@ import type { Ruleset, SopRule } from "../src/harness/contracts/rule.js";
 import { SimpleRuleRetriever } from "../src/knowledge/retrieval.js";
 import { GraphStore } from "../src/knowledge/graph.store.js";
 import { MockAIProvider } from "../src/providers/mock.provider.js";
+import type { AIProvider, StructuredGenerationRequest, StructuredGenerationResult } from "../src/providers/provider.js";
+import { runQc } from "../src/workflows/sop-compliance-qc/run-qc.js";
+import { writeJson } from "../src/workflows/sop-compliance-qc/store.js";
 
 const adapter = new MarkdownDocumentAdapter();
+
+class MalformedFindingProvider implements AIProvider {
+  readonly name = "malformed";
+  readonly model = "malformed-test";
+
+  async generateStructured<T>(request: StructuredGenerationRequest): Promise<StructuredGenerationResult<T>> {
+    const parsed = request.schemaName === "qc-finding-candidates"
+      ? { findings: [{ findingId: "BAD-001", title: "Incomplete provider finding", severity: "major", target: {}, rule: {}, sopSource: {}, explanation: {}, evaluation: {} }] }
+      : { supported: true, ruleAppliedCorrectly: true, targetEvidenceSupportsFinding: true, contradictions: [], score: 0.95, reason: "supported" };
+    return { provider: this.name, model: this.model, rawText: JSON.stringify(parsed), parsed: parsed as T, latencyMs: 0 };
+  }
+}
 
 function sampleRule(status: SopRule["status"] = "pending_approval"): SopRule {
   return {
@@ -78,6 +95,16 @@ test("rule source IDs must exist", async () => {
   assert.equal(validateRuleset(ruleset, sop).sensors.find((sensor) => sensor.sensor === "source-reference")?.status, "PASS");
 });
 
+test("rule missing source block ids is rejected without crashing", async () => {
+  const sop = await adapter.parse("data/demo/sop/document-control-sop.md", "sop");
+  const rule = sampleRule() as unknown as SopRule;
+  delete (rule.source as Partial<SopRule["source"]>).sourceBlockIds;
+  const ruleset: Ruleset = { rulesetId: "RULESET-SOP-DEMO-001", sopDocumentId: sop.documentId, sopFileName: sop.fileName, title: "Rules", status: "generated", generatedAt: "now", rules: [rule] };
+  const validation = validateRuleset(ruleset, sop);
+  assert.equal(validation.sensors.find((sensor) => sensor.sensor === "source-reference")?.status, "FAIL");
+  assert.equal(validation.valid, 0);
+});
+
 test("pending rule cannot be used for QC", () => {
   assert.equal(assertRuleUsableForQc(sampleRule("pending_approval")), false);
 });
@@ -125,6 +152,32 @@ test("duplicate findings can be detected", async () => {
   const target = await adapter.parse("data/demo/target/batch-record.md", "target");
   const results = validateFindings([sampleFinding(), sampleFinding()], [sampleRule("approved")], target);
   assert.equal(results[1]?.finding.decision, "REJECTED");
+});
+
+test("QC run reports rejected malformed provider findings", async () => {
+  const root = ".tmp/qc-malformed-provider/data/clients";
+  await fs.rm(".tmp/qc-malformed-provider", { recursive: true, force: true });
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.normalizedDir, { recursive: true });
+  const targetPath = path.join(scope.normalizedDir, "target.md");
+  await fs.writeFile(targetPath, "# Target\n\nDocument Number: BMR-001\n", "utf8");
+  const ruleset: Ruleset = {
+    rulesetId: "RULESET-SOP-DEMO-001",
+    sopDocumentId: "SOP-DEMO-001",
+    sopFileName: "document-control-sop.md",
+    title: "Rules",
+    status: "approved",
+    generatedAt: "now",
+    rules: [sampleRule("approved")]
+  };
+  await writeJson(path.join(scope.rulesetsApprovedDir, `${ruleset.rulesetId}.json`), ruleset);
+
+  const result = await runQc(targetPath, new MalformedFindingProvider(), scope);
+  const report = await fs.readFile(result.reportPath, "utf8");
+  assert.equal(result.finalDecision, "REJECT");
+  assert.equal(result.rejected.length, 1);
+  assert.match(report, /Rejected Findings:\n1/);
+  assert.match(report, /## Rejected Candidate Findings/);
 });
 
 test("graph serialization and finding lineage resolve", async () => {

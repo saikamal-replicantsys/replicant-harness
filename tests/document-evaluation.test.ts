@@ -5,6 +5,7 @@ import { headingSimilarity } from "../sensors/structure/sections.js";
 import { numericFidelity, unitFidelity } from "../sensors/factual/numbers.js";
 import { formulaFidelity, formulasEquivalent } from "../sensors/factual/formulas.js";
 import { calculateOverallScore, decide } from "../scoring/scoring-engine.js";
+import { normalizeText } from "../tools/normalize-document.js";
 import type { DocumentEvaluationResult } from "../contracts/evaluation-result.js";
 
 test("character Levenshtein returns 100% for identical text", () => {
@@ -46,6 +47,10 @@ test("comparator fidelity catches opposite comparator", () => {
 test("unit fidelity treats minutes and min as equivalent", () => {
   const result = unitFidelity("Dissolution occurs in 30 minutes", "Dissolution occurs in 30 min");
   assert.equal(result.score, 1);
+});
+
+test("normalization repairs common Word extraction mojibake", () => {
+  assert.equal(normalizeText("37 \u00c2\u00b1 0.5 \u00c2\u00b0C and 0.45 \u00ce\u00bcm"), "37 \u00b1 0.5\u00b0C and 0.45 \u00b5m");
 });
 
 test("formula normalization matches equivalent formatting", () => {

@@ -5,8 +5,10 @@ export function buildClientReport(params: {
   targetTitle: string;
   rulesetsLoaded: number;
   rulesEvaluated: number;
+  finalDecision: "ACCEPT" | "HUMAN_REVIEW" | "REJECT";
   accepted: QcFinding[];
   humanReview: QcFinding[];
+  rejected: QcFinding[];
   approvedRules: SopRule[];
 }): string {
   const findingBlock = (finding: QcFinding) => `### ${finding.findingId} - ${finding.title}
@@ -70,6 +72,12 @@ ${params.accepted.length}
 Human Review:
 ${params.humanReview.length}
 
+Rejected Findings:
+${params.rejected.length}
+
+Final Decision:
+${params.finalDecision}
+
 ## Findings
 
 ${params.accepted.length ? params.accepted.map(findingBlock).join("\n") : "No accepted findings."}
@@ -77,5 +85,9 @@ ${params.accepted.length ? params.accepted.map(findingBlock).join("\n") : "No ac
 ## Human Review Findings
 
 ${params.humanReview.length ? params.humanReview.map(findingBlock).join("\n") : "None."}
+
+## Rejected Candidate Findings
+
+${params.rejected.length ? params.rejected.map(findingBlock).join("\n") : "None."}
 `;
 }

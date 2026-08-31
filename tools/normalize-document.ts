@@ -1,27 +1,30 @@
 const unitAliases: Array<[RegExp, string]> = [
-  [/\bmicroliters?\b/gi, "µL"],
-  [/\bmicrolitres?\b/gi, "µL"],
-  [/\bmicrometers?\b/gi, "µm"],
-  [/\bmicrometres?\b/gi, "µm"],
+  [/\bmicroliters?\b/gi, "\u00b5L"],
+  [/\bmicrolitres?\b/gi, "\u00b5L"],
+  [/\bmicrometers?\b/gi, "\u00b5m"],
+  [/\bmicrometres?\b/gi, "\u00b5m"],
   [/\bmilliliters?\b/gi, "mL"],
   [/\bmillilitres?\b/gi, "mL"],
   [/\bminutes?\b/gi, "min"],
   [/\bseconds?\b/gi, "sec"],
-  [/\bdegrees?\s*celsius\b/gi, "°C"],
-  [/\bdeg\.?\s*c\b/gi, "°C"]
+  [/\bdegrees?\s*celsius\b/gi, "\u00b0C"],
+  [/\bdeg\.?\s*c\b/gi, "\u00b0C"]
 ];
 
 export function normalizeText(input: string): string {
-  let text = input.normalize("NFKC");
+  let text = input.replace(/Î¼/g, "\u00b5").normalize("NFKC");
   text = text
-    .replace(/[“”„‟]/g, "\"")
-    .replace(/[‘’‚‛]/g, "'")
-    .replace(/[‐‑‒–—―]/g, "-")
-    .replace(/[×✕]/g, "x")
-    .replace(/≤/g, "<=")
-    .replace(/≥/g, ">=")
-    .replace(/\s*±\s*/g, " ± ")
-    .replace(/\s*°\s*C\b/gi, "°C")
+    .replace(/Â±/g, "\u00b1")
+    .replace(/Â°/g, "\u00b0")
+    .replace(/Âµ|μ/g, "\u00b5")
+    .replace(/â‰¤|≤/g, "<=")
+    .replace(/â‰¥|≥/g, ">=")
+    .replace(/Ã—|âœ•|×/g, "x")
+    .replace(/[â€œâ€â€žâ€Ÿ“”„‟]/g, "\"")
+    .replace(/[â€˜â€™â€šâ€›‘’‚‛]/g, "'")
+    .replace(/[â€â€‘â€’â€“â€”â€•‐‑‒–—―]/g, "-")
+    .replace(/\s*\u00b1\s*/g, " \u00b1 ")
+    .replace(/\s*\u00b0\s*C\b/gi, "\u00b0C")
     .replace(/([,;:])(?=\S)/g, "$1 ")
     .replace(/\s+([,.;:])/g, "$1");
 
@@ -38,7 +41,7 @@ export function normalizeForComparison(input: string): string {
 
 export function tokenize(input: string): string[] {
   return normalizeForComparison(input)
-    .replace(/[^\p{L}\p{N}.%µ°/+<>=-]+/gu, " ")
+    .replace(/[^\p{L}\p{N}.%\u00b5\u00b0/+<>=-]+/gu, " ")
     .split(/\s+/)
     .filter(Boolean);
 }

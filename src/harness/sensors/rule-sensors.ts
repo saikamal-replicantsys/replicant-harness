@@ -12,7 +12,8 @@ const severities = new Set(["critical", "major", "minor", "informational"]);
 const statuses = new Set(["pending_approval", "approved", "rejected"]);
 
 function sourceTextContained(rule: SopRule, sop: NormalizedDocument): boolean {
-  const text = rule.source.sourceText.toLowerCase();
+  const text = (rule.source.sourceText ?? "").toLowerCase();
+  if (!text || !Array.isArray(rule.source.sourceBlockIds)) return false;
   return rule.source.sourceBlockIds.some((blockId) => {
     const block = sop.blocks.find((candidate) => candidate.blockId === blockId);
     return block ? block.text.toLowerCase().includes(text.slice(0, Math.min(text.length, 40)).toLowerCase()) || text.includes(block.text.toLowerCase()) : false;
@@ -20,11 +21,17 @@ function sourceTextContained(rule: SopRule, sop: NormalizedDocument): boolean {
 }
 
 function modalityValid(rule: SopRule): boolean {
-  const source = rule.source.sourceText.toLowerCase();
-  const statement = rule.statement.toLowerCase();
+  const source = (rule.source.sourceText ?? "").toLowerCase();
+  const statement = (rule.statement ?? "").toLowerCase();
   if (source.includes("should") && statement.includes("shall")) return false;
   if (source.includes("may") && (statement.includes("shall") || statement.includes("must"))) return false;
   return true;
+}
+
+function ensureRuleShape(rule: SopRule): void {
+  rule.source ??= { documentId: "", sourceBlockIds: [], sourceText: "" };
+  rule.source.sourceBlockIds = Array.isArray(rule.source.sourceBlockIds) ? rule.source.sourceBlockIds : [];
+  rule.source.sourceText ??= "";
 }
 
 export function validateRuleset(ruleset: Ruleset, sop: NormalizedDocument): RuleValidationSummary {
@@ -34,9 +41,10 @@ export function validateRuleset(ruleset: Ruleset, sop: NormalizedDocument): Rule
   let requiresReview = 0;
 
   for (const rule of ruleset.rules) {
+    ensureRuleShape(rule);
     const messages: string[] = [];
     const schemaValid = Boolean(rule.ruleId && rule.rulesetId && rule.title && rule.statement && severities.has(rule.severity) && statuses.has(rule.status));
-    const sourcesValid = rule.source.documentId === sop.documentId && rule.source.sourceBlockIds.every((blockId) => sop.blocks.some((block) => block.blockId === blockId));
+    const sourcesValid = rule.source.documentId === sop.documentId && rule.source.sourceBlockIds.length > 0 && rule.source.sourceBlockIds.every((blockId) => sop.blocks.some((block) => block.blockId === blockId));
     const sourceTextValid = sourceTextContained(rule, sop);
     const modal = modalityValid(rule);
     const key = rule.statement.toLowerCase().replace(/\s+/g, " ").trim();
