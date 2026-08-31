@@ -197,3 +197,37 @@ Client Report + Conceptual Old-QC Adapter + Trace
 ```
 
 Future document formats should be added as new `DocumentAdapter` implementations. The workflow should continue to consume `NormalizedDocument`, not raw files.
+
+## 22. Client-Scoped Document Ingestion
+
+The SOP/QC harness now has a local ingestion step for testing against real client documents without redesigning the rule, approval, QC, sensor, provenance, or provider architecture.
+
+```text
+Client source folder
+data/clients/<client-id>/source
+     |
+DocumentAdapter
+     |
+Markdown / DOCX / XLSX normalization
+     |
+data/clients/<client-id>/normalized
+     |
+Existing SOP rule generation / approval / QC
+     |
+data/clients/<client-id>/rulesets
+data/clients/<client-id>/findings
+data/clients/<client-id>/reports
+data/clients/<client-id>/traces
+data/clients/<client-id>/graph.json
+```
+
+The adapters all emit the existing `NormalizedDocument` contract:
+
+- `MarkdownDocumentAdapter` preserves headings, lists, tables, and paragraph block locations from Markdown.
+- `DocxDocumentAdapter` uses the existing DOCX extraction layer to preserve headings, paragraphs, tables, and document order where available.
+- `XlsxDocumentAdapter` preserves workbook name, sheet names, populated cells, displayed values, formulas, and cell references.
+- Legacy `.doc` files fail clearly because V1 does not include a reliable local converter/parser.
+
+Client scope is passed into the existing workflows as path configuration. With `--client test-sop`, generated rulesets, approved rulesets, graph nodes, findings, reports, and traces are written only inside `data/clients/test-sop/`. QC loads approved rules only from that same client directory. This is a deterministic local filesystem boundary for the POC, not a production authorization model.
+
+Real-document safety remains explicit: ingestion does not call Gemini, does not mutate source files, and does not send whole client folders to a provider. Gemini receives only the normalized document selected by the rule-generation or QC command.

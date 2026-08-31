@@ -1,14 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { DocumentAdapter } from "./document-adapter.js";
+import type { DocumentAdapter, DocumentParseOptions } from "./document-adapter.js";
 import type { DocumentType, NormalizedBlock, NormalizedBlockType, NormalizedDocument } from "./normalized-document.js";
-
-function slugId(filePath: string, documentType: DocumentType): string {
-  const base = path.basename(filePath, path.extname(filePath)).toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "");
-  if (base.includes("DOCUMENT-CONTROL-SOP")) return "SOP-DEMO-001";
-  if (base.includes("BATCH-RECORD")) return "TARGET-DEMO-001";
-  return `${documentType.toUpperCase()}-${base || "DOCUMENT"}`;
-}
+import { deterministicBlockId, slugId } from "./document-ids.js";
 
 function blockType(line: string): { type: NormalizedBlockType; text: string; level?: number; rows?: string[][] } {
   const heading = line.match(/^(#{1,6})\s+(.+)$/);
@@ -28,10 +22,11 @@ export class MarkdownDocumentAdapter implements DocumentAdapter {
     return path.extname(filePath).toLowerCase() === ".md";
   }
 
-  async parse(filePath: string, documentType: DocumentType): Promise<NormalizedDocument> {
+  async parse(filePath: string, options: DocumentType | DocumentParseOptions): Promise<NormalizedDocument> {
     if (!this.supports(filePath)) throw new Error(`MarkdownDocumentAdapter only supports .md files: ${filePath}`);
+    const parseOptions = typeof options === "string" ? { documentType: options } : options;
     const raw = await fs.readFile(filePath, "utf8");
-    const documentId = slugId(filePath, documentType);
+    const documentId = slugId(filePath, parseOptions.documentType);
     const lines = raw.replace(/\r\n?/g, "\n").split("\n");
     const blocks: NormalizedBlock[] = [];
     let currentSection = "";
@@ -46,7 +41,7 @@ export class MarkdownDocumentAdapter implements DocumentAdapter {
         currentSection = parsed.text;
         firstHeading ||= parsed.text;
       }
-      const blockId = `${documentId}-B${String(blocks.length + 1).padStart(3, "0")}`;
+      const blockId = deterministicBlockId(documentId, blocks.length);
       blocks.push({
         blockId,
         type: parsed.type,
@@ -55,6 +50,7 @@ export class MarkdownDocumentAdapter implements DocumentAdapter {
         rows: parsed.rows,
         location: {
           section: currentSection || undefined,
+          paragraphIndex: blocks.length + 1,
           blockId
         }
       });
@@ -62,9 +58,12 @@ export class MarkdownDocumentAdapter implements DocumentAdapter {
 
     return {
       documentId,
+      clientId: parseOptions.clientId,
+      sourceFile: filePath,
+      normalizedFile: parseOptions.normalizedFile,
       fileName: path.basename(filePath),
       fileType: "markdown",
-      documentType,
+      documentType: parseOptions.documentType,
       title: firstHeading || path.basename(filePath, path.extname(filePath)),
       blocks,
       fullText: blocks.map((block) => block.text).join("\n")

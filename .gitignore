@@ -18,3 +18,14 @@ data/findings/*.json
 data/knowledge/*.json
 data/reports/*.md
 data/traces/*.json
+data/clients/*/source/*
+data/clients/*/normalized/*
+data/clients/*/target/*
+data/clients/*/rulesets/generated/*.json
+data/clients/*/rulesets/approved/*.json
+data/clients/*/findings/*
+data/clients/*/reports/*
+data/clients/*/traces/*
+data/clients/*/graph.json
+/lambda/
+/test-sop/

@@ -14,9 +14,9 @@ export interface HarnessTrace {
   [key: string]: unknown;
 }
 
-export async function writeTrace(trace: HarnessTrace): Promise<string> {
-  await fs.mkdir("data/traces", { recursive: true });
-  const filePath = path.join("data/traces", `${trace.runId}.json`);
+export async function writeTrace(trace: HarnessTrace, tracesDir = "data/traces"): Promise<string> {
+  await fs.mkdir(tracesDir, { recursive: true });
+  const filePath = path.join(tracesDir, `${trace.runId}.json`);
   await fs.writeFile(filePath, `${JSON.stringify(trace, null, 2)}\n`, "utf8");
   return filePath;
 }

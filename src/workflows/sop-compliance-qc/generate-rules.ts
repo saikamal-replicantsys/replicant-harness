@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { assertPathInside } from "../../client/client-scope.js";
+import type { ClientScope } from "../../client/client-scope.js";
 import type { AIProvider } from "../../providers/provider.js";
 import { MarkdownDocumentAdapter } from "../../documents/markdown.adapter.js";
 import type { Ruleset } from "../../harness/contracts/rule.js";
@@ -11,11 +13,12 @@ import { evaluateRuleGrounding } from "./evaluators.js";
 import type { RuleCandidateResponse, RuleGenerationResult } from "./workflow.types.js";
 import { ruleCandidatesSchema } from "../../providers/structured-schemas.js";
 
-export async function generateRules(sopPath: string, provider: AIProvider): Promise<RuleGenerationResult> {
+export async function generateRules(sopPath: string, provider: AIProvider, scope?: ClientScope): Promise<RuleGenerationResult> {
+  if (scope) assertPathInside(sopPath, scope.normalizedDir);
   const startedAt = new Date().toISOString();
   const adapter = new MarkdownDocumentAdapter();
-  const sop = await adapter.parse(sopPath, "sop");
-  const normalizedPath = path.join("data/normalized/sop", `${sop.documentId}.json`);
+  const sop = await adapter.parse(sopPath, { documentType: "sop", clientId: scope?.clientId, normalizedFile: sopPath });
+  const normalizedPath = path.join(scope?.normalizedDir ?? "data/normalized/sop", `${sop.documentId}.json`);
   await writeJson(normalizedPath, sop);
 
   const guide = await fs.readFile("guides/sop-rule-generation.md", "utf8");
@@ -51,8 +54,8 @@ export async function generateRules(sopPath: string, provider: AIProvider): Prom
   }
 
   const validation = validateRuleset(ruleset, sop);
-  const generatedPath = await writeJson(path.join("data/rulesets/generated", `${ruleset.rulesetId}.json`), ruleset);
-  const graph = new GraphStore();
+  const generatedPath = await writeJson(path.join(scope?.rulesetsGeneratedDir ?? "data/rulesets/generated", `${ruleset.rulesetId}.json`), ruleset);
+  const graph = new GraphStore(scope?.graphPath);
   await graph.addDocument(sop);
   await graph.addRuleset(ruleset);
   const tracePath = await writeTrace({
@@ -68,6 +71,6 @@ export async function generateRules(sopPath: string, provider: AIProvider): Prom
     sensors: validation.sensors,
     rules: { generated: validation.generated, valid: validation.valid, requiresReview: validation.requiresReview },
     finalDecision: "AWAITING_HUMAN_APPROVAL"
-  });
+  }, scope?.tracesDir);
   return { ruleset, generatedPath, tracePath };
 }

@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { assertPathInside } from "../../client/client-scope.js";
+import type { ClientScope } from "../../client/client-scope.js";
 import type { AIProvider } from "../../providers/provider.js";
 import { MarkdownDocumentAdapter } from "../../documents/markdown.adapter.js";
 import type { FindingCandidateResponse } from "./workflow.types.js";
@@ -15,14 +17,15 @@ import { toConceptualOldQc } from "../../adapters/old-qc-output.adapter.js";
 import { writeTrace } from "../../harness/tracing/trace.js";
 import { findingsSchema } from "../../providers/structured-schemas.js";
 
-export async function runQc(targetPath: string, provider: AIProvider): Promise<QcRunResult> {
+export async function runQc(targetPath: string, provider: AIProvider, scope?: ClientScope): Promise<QcRunResult> {
+  if (scope) assertPathInside(targetPath, scope.normalizedDir);
   const startedAt = new Date().toISOString();
   const runId = `QC-RUN-${Date.now()}`;
   const adapter = new MarkdownDocumentAdapter();
-  const target = await adapter.parse(targetPath, "target");
-  await writeJson(path.join("data/normalized/target", `${target.documentId}.json`), target);
+  const target = await adapter.parse(targetPath, { documentType: "target", clientId: scope?.clientId, normalizedFile: targetPath });
+  await writeJson(path.join(scope?.normalizedDir ?? "data/normalized/target", `${target.documentId}.json`), target);
 
-  const approvedRules = await loadApprovedRules();
+  const approvedRules = await loadApprovedRules(scope);
   if (approvedRules.length === 0) throw new Error("No approved rules found. Run rules, then approve-rules before QC.");
   const retrieved = await new SimpleRuleRetriever().retrieve(target, approvedRules);
   const response = await provider.generateStructured<FindingCandidateResponse>({
@@ -35,7 +38,7 @@ export async function runQc(targetPath: string, provider: AIProvider): Promise<Q
     prompt: JSON.stringify({ targetDocument: target, approvedRules: retrieved.map((item) => item.rule) })
   });
 
-  const graph = new GraphStore();
+  const graph = new GraphStore(scope?.graphPath);
   await graph.addDocument(target);
   const findings = response.parsed.findings.map((finding, index) => ({
     ...finding,
@@ -55,16 +58,18 @@ export async function runQc(targetPath: string, provider: AIProvider): Promise<Q
 
   const validations = validateFindings(findings, approvedRules, target);
   const finalFindings = validations.map((validation) => validation.finding);
-  await buildFindingProvenance(finalFindings);
+  await buildFindingProvenance(finalFindings, graph);
 
   const accepted = finalFindings.filter((finding) => finding.decision === "ACCEPTED");
   const humanReview = finalFindings.filter((finding) => finding.decision === "HUMAN_REVIEW");
   const rejected = finalFindings.filter((finding) => finding.decision === "REJECTED");
   const baseName = path.basename(targetPath, path.extname(targetPath));
-  const findingsPath = await writeJson(path.join("data/findings", `${baseName}.findings.json`), { runId, findings: finalFindings });
-  const oldQcPath = await writeJson(path.join("data/findings", `${baseName}.old-qc.json`), toConceptualOldQc(finalFindings));
-  const reportPath = path.join("data/reports", `${baseName}-qc-report.md`);
-  await writeJson(path.join("data/findings", `${baseName}.human-review.json`), humanReview);
+  const findingsDir = scope?.findingsDir ?? "data/findings";
+  const reportsDir = scope?.reportsDir ?? "data/reports";
+  const findingsPath = await writeJson(path.join(findingsDir, `${baseName}.findings.json`), { runId, findings: finalFindings });
+  const oldQcPath = await writeJson(path.join(findingsDir, `${baseName}.old-qc.json`), toConceptualOldQc(finalFindings));
+  const reportPath = path.join(reportsDir, `${baseName}-qc-report.md`);
+  await writeJson(path.join(findingsDir, `${baseName}.human-review.json`), humanReview);
   await fs.mkdir(path.dirname(reportPath), { recursive: true });
   await fs.writeFile(reportPath, buildClientReport({
     targetTitle: target.title,
@@ -94,7 +99,7 @@ export async function runQc(targetPath: string, provider: AIProvider): Promise<Q
     evidenceIds: finalFindings.flatMap((finding) => [...finding.sopSource.sourceBlockIds, ...finding.target.blockIds]),
     ruleIds: finalFindings.map((finding) => finding.rule.ruleId),
     finalDecision: humanReview.length > 0 ? "HUMAN_REVIEW" : "ACCEPT"
-  });
+  }, scope?.tracesDir);
 
   return { runId, findings: finalFindings, accepted, humanReview, rejected, reportPath, findingsPath, oldQcPath, tracePath };
 }

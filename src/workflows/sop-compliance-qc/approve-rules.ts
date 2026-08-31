@@ -1,12 +1,13 @@
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import path from "node:path";
+import type { ClientScope } from "../../client/client-scope.js";
 import type { Ruleset } from "../../harness/contracts/rule.js";
 import { GraphStore } from "../../knowledge/graph.store.js";
 import { findGeneratedRuleset, readJson, writeJson } from "./store.js";
 
-export async function approveRules(idOrPath: string, approveAll = false): Promise<{ approvedPath: string; approved: number; rejected: number; pending: number }> {
-  const rulesetPath = await findGeneratedRuleset(idOrPath);
+export async function approveRules(idOrPath: string, approveAll = false, scope?: ClientScope): Promise<{ approvedPath: string; approved: number; rejected: number; pending: number }> {
+  const rulesetPath = await findGeneratedRuleset(idOrPath, scope);
   const ruleset = await readJson<Ruleset>(rulesetPath);
   const rl = approveAll ? undefined : readline.createInterface({ input, output });
   let approved = 0;
@@ -36,7 +37,7 @@ export async function approveRules(idOrPath: string, approveAll = false): Promis
   }
 
   ruleset.status = pending === 0 && rejected === 0 ? "approved" : "partially_approved";
-  const approvedPath = await writeJson(path.join("data/rulesets/approved", `${ruleset.rulesetId}.json`), ruleset);
-  await new GraphStore().addRuleset(ruleset);
+  const approvedPath = await writeJson(path.join(scope?.rulesetsApprovedDir ?? "data/rulesets/approved", `${ruleset.rulesetId}.json`), ruleset);
+  await new GraphStore(scope?.graphPath).addRuleset(ruleset);
   return { approvedPath, approved, rejected, pending };
 }

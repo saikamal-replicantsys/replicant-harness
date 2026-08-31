@@ -15,7 +15,11 @@
     "evaluations",
     "provider-abstraction",
     "citation-validation",
-    "proof-of-concept"
+    "proof-of-concept",
+    "sop-qc",
+    "client-scoped-ingestion",
+    "docx",
+    "xlsx"
   ],
   "repository": {
     "type": "git",
@@ -25,6 +29,7 @@
     "concept-demo": "node tools/demo-runner.mjs",
     "demo": "tsx src/cli/demo.ts",
     "cli": "tsx src/cli/index.ts",
+    "ingest": "tsx src/cli/ingest.ts",
     "rules": "tsx src/cli/generate-rules.ts",
     "approve-rules": "tsx src/cli/approve-rules.ts",
     "qc": "tsx src/cli/run-qc.ts",

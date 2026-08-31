@@ -321,7 +321,45 @@ The demo and tests use `MockAIProvider` and do not require Gemini.
 
 ## SOP QC Commands
 
-Generate candidate rules:
+Normalize client source documents:
+
+```bash
+npm run ingest -- --client test-sop
+```
+
+This scans `data/clients/test-sop/source/` and writes normalized Markdown plus metadata to `data/clients/test-sop/normalized/`. The same command works with `--client lamba`.
+
+Generate candidate rules from a client-normalized SOP:
+
+```bash
+npm run rules -- --client test-sop data/clients/test-sop/normalized/<sop>.md
+```
+
+Approve rules manually:
+
+```bash
+npm run approve-rules -- --client test-sop <ruleset-id>
+```
+
+Approve all for fixture/demo use only:
+
+```bash
+npm run approve-rules -- --client test-sop <ruleset-id> --all
+```
+
+Run QC with that client's approved rules only:
+
+```bash
+npm run qc -- --client test-sop data/clients/test-sop/normalized/<target>.md
+```
+
+Inspect lineage from that client's graph:
+
+```bash
+npm run lineage -- --client test-sop <finding-id-or-rule-id>
+```
+
+Legacy non-client fixture commands are still available:
 
 ```bash
 npm run rules -- data/sop/document-control-sop.md
@@ -357,6 +395,40 @@ Inspect lineage:
 npm run lineage -- QC-F-001
 ```
 
+## Client-Scoped Ingestion
+
+Client folders are filesystem scopes for local POC testing, not an authentication or tenancy implementation. A client workspace uses:
+
+```text
+data/clients/<client-id>/
+  source/
+  normalized/
+  rulesets/
+    generated/
+    approved/
+  target/
+  findings/
+  reports/
+  traces/
+  graph.json
+```
+
+All generated artifacts for `--client <client-id>` stay under that directory. Rule generation writes candidate rules to `rulesets/generated/`, approval writes approved rules to `rulesets/approved/`, QC loads only those approved rules, and lineage reads only that client's `graph.json`.
+
+Supported ingestion formats:
+
+- Markdown (`.md`)
+- Word DOCX (`.docx`)
+- Excel workbook (`.xlsx`)
+- Legacy Word DOC (`.doc`) is detected but not parsed; convert it to `.docx` first.
+
+Each source file in `source/` produces:
+
+- `normalized/<file>.md`
+- `normalized/<file>.metadata.json`
+
+Metadata records the client id, source file, normalized file, title, block ids, block types, and source locations. XLSX ingestion keeps sheet names and cell references in block metadata so future findings can cite locations such as `Sheet: Results`, `Cell: D14`.
+
 ## SOP QC Outputs
 
 Runtime outputs are written under `data/`:
@@ -373,12 +445,13 @@ The conceptual old-QC adapter writes `data/findings/<target>.old-qc.json` and in
 
 ## SOP QC Limitations
 
-- Markdown-only input.
+- Client ingestion supports Markdown, DOCX, and XLSX; SOP/QC workflows consume normalized Markdown.
+- Legacy `.doc` files require manual conversion to `.docx`.
 - No OCR.
 - No page-coordinate mapping.
 - No vector retrieval.
 - No production authorization.
-- No tenant isolation implementation.
+- Client IDs are filesystem scopes, not production tenant isolation.
 - No production data persistence.
 - Semantic evaluators use AI in real mode and are therefore probabilistic.
 - Human approval of rules remains mandatory.
