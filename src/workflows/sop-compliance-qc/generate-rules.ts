@@ -12,6 +12,7 @@ import { writeJson } from "./store.js";
 import { evaluateRuleGrounding } from "./evaluators.js";
 import type { RuleCandidateResponse, RuleGenerationResult } from "./workflow.types.js";
 import { ruleCandidatesSchema } from "../../providers/structured-schemas.js";
+import { buildYamlRuleset, readNormalizedMetadata } from "./yaml-ruleset.js";
 
 export async function generateRules(sopPath: string, provider: AIProvider, scope?: ClientScope): Promise<RuleGenerationResult> {
   if (scope) assertPathInside(sopPath, scope.normalizedDir);
@@ -21,8 +22,33 @@ export async function generateRules(sopPath: string, provider: AIProvider, scope
   const normalizedPath = path.join(scope?.normalizedDir ?? "data/normalized/sop", `${sop.documentId}.json`);
   await writeJson(normalizedPath, sop);
 
-  const guide = await fs.readFile("guides/sop-rule-generation.md", "utf8");
   const runId = `RULE-GEN-${Date.now()}`;
+  const metadata = await readNormalizedMetadata(sopPath);
+  if (metadata?.fileType === "yaml" && metadata.sourceFile) {
+    const ruleset = await buildYamlRuleset(metadata.sourceFile, sop);
+    const validation = validateRuleset(ruleset, sop);
+    const generatedPath = await writeJson(path.join(scope?.rulesetsGeneratedDir ?? "data/rulesets/generated", `${ruleset.rulesetId}.json`), ruleset);
+    const graph = new GraphStore(scope?.graphPath);
+    await graph.addDocument(sop);
+    await graph.addRuleset(ruleset);
+    const tracePath = await writeTrace({
+      runId,
+      workflow: "sop.rule_generation",
+      provider: "yaml",
+      model: "deterministic-yaml-import",
+      startedAt,
+      completedAt: new Date().toISOString(),
+      documentId: sop.documentId,
+      guideVersions: { "sop-rule-generation": "yaml-import" },
+      attempts: [{ attempt: 1, latencyMs: 0, tokenUsage: { input: 0, output: 0 } }],
+      sensors: validation.sensors,
+      rules: { generated: validation.generated, valid: validation.valid, requiresReview: validation.requiresReview },
+      finalDecision: "AWAITING_HUMAN_APPROVAL"
+    }, scope?.tracesDir);
+    return { ruleset, generatedPath, tracePath };
+  }
+
+  const guide = await fs.readFile("guides/sop-rule-generation.md", "utf8");
   const response = await provider.generateStructured<RuleCandidateResponse>({
     runId,
     guideId: "sop-rule-generation",

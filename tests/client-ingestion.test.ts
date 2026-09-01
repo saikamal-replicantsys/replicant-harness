@@ -13,6 +13,7 @@ import { YamlDocumentAdapter } from "../src/documents/yaml.adapter.js";
 import { loadApprovedRules, writeJson } from "../src/workflows/sop-compliance-qc/store.js";
 import { GraphStore } from "../src/knowledge/graph.store.js";
 import type { Ruleset, SopRule } from "../src/harness/contracts/rule.js";
+import { buildYamlRuleset } from "../src/workflows/sop-compliance-qc/yaml-ruleset.js";
 
 const root = ".tmp/client-ingestion-tests/data/clients";
 
@@ -115,6 +116,44 @@ test("YAML normalization preserves rule-like sections", async () => {
   assert.equal(metadata.fileType, "yaml");
   assert.equal(metadata.title, "Analytical Method Development Rules");
   assert.match(markdown, /### Rule AMD-001/);
+});
+
+test("YAML ruleset import preserves all YAML rules deterministically", async () => {
+  await reset();
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.sourceDir, { recursive: true });
+  const sourceFile = path.join(scope.sourceDir, "method.yaml");
+  await fs.writeFile(sourceFile, `name: Analytical Method Development Rules
+rules:
+- id: AMD-001
+  title: First rule
+  severity: critical
+  requirement: First requirement must be met.
+  expected: First expectation.
+  check_type: presence
+  source:
+    section: 2.0 Scope
+    quote: First requirement must be met.
+    quote_verified: true
+- id: AMD-002
+  title: Second rule
+  severity: major
+  requirement: Second requirement must be documented.
+  expected: Second expectation.
+  check_type: presence
+  source:
+    section: 3.0 Procedure
+    quote: Second requirement must be documented.
+    quote_verified: true
+`, "utf8");
+
+  const ingest = await ingestClient(scope, [new YamlDocumentAdapter()]);
+  const markdownAdapter = new MarkdownDocumentAdapter();
+  const sop = await markdownAdapter.parse(ingest.converted[0]!.normalizedFile, { documentType: "sop", clientId: scope.clientId, normalizedFile: ingest.converted[0]!.normalizedFile });
+  const ruleset = await buildYamlRuleset(sourceFile, sop, "2026-09-01T00:00:00.000Z");
+  assert.equal(ruleset.rules.length, 2);
+  assert.deepEqual(ruleset.rules.map((rule) => rule.ruleId), ["AMD-001", "AMD-002"]);
+  assert.equal(ruleset.rules[0]?.generation.provider, "yaml");
 });
 
 test("DOCX normalization preserves headings and paragraph locations", async () => {

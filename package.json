@@ -52,6 +52,7 @@
     "dotenv": "^17.4.2",
     "fast-xml-parser": "^5.11.0",
     "jszip": "^3.10.1",
-    "mammoth": "^1.12.1"
+    "mammoth": "^1.12.1",
+    "yaml": "^2.9.0"
   }
 }
