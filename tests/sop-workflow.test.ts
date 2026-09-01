@@ -29,6 +29,47 @@ class MalformedFindingProvider implements AIProvider {
   }
 }
 
+class AcceptedFindingProvider implements AIProvider {
+  readonly name = "accepted-finding";
+  readonly model = "accepted-finding-test";
+
+  async generateStructured<T>(request: StructuredGenerationRequest): Promise<StructuredGenerationResult<T>> {
+    if (request.schemaName === "finding-grounding") {
+      const parsed = { supported: true, ruleAppliedCorrectly: true, targetEvidenceSupportsFinding: true, contradictions: [], score: 0.95, reason: "supported" };
+      return { provider: this.name, model: this.model, rawText: JSON.stringify(parsed), parsed: parsed as T, latencyMs: 0 };
+    }
+    const prompt = JSON.parse(request.prompt);
+    const target = prompt.targetDocument;
+    const rule = prompt.approvedRules[0];
+    const parsed = {
+      findings: [{
+        findingId: "QC-F-ACCEPTED-001",
+        decision: "ACCEPTED",
+        severity: "major",
+        title: "Effective date is missing",
+        description: "The document does not contain an effective date.",
+        target: {
+          documentId: target.documentId,
+          blockIds: target.blocks.slice(1, 3).map((block: { blockId: string }) => block.blockId),
+          section: "Document Header",
+          observedText: "No effective date was identified."
+        },
+        rule: { ruleId: rule.ruleId, rulesetId: rule.rulesetId, title: rule.title },
+        sopSource: {
+          documentId: rule.source.documentId,
+          documentName: "document-control-sop.md",
+          section: rule.source.section,
+          sourceBlockIds: rule.source.sourceBlockIds,
+          sourceText: rule.source.sourceText
+        },
+        explanation: { expected: "An effective date must be present.", observed: "No effective date was identified.", reason: "Required metadata is absent." },
+        evaluation: { ruleExists: false, ruleApproved: false, ruleGrounded: false, findingGrounded: false, provenanceValid: false, score: 0 }
+      }]
+    };
+    return { provider: this.name, model: this.model, rawText: JSON.stringify(parsed), parsed: parsed as T, latencyMs: 0 };
+  }
+}
+
 function sampleRule(status: SopRule["status"] = "pending_approval"): SopRule {
   return {
     ruleId: "SOP-DEMO-001-R004",
@@ -178,6 +219,29 @@ test("QC run reports rejected malformed provider findings", async () => {
   assert.equal(result.rejected.length, 1);
   assert.match(report, /Rejected Findings:\n1/);
   assert.match(report, /## Rejected Candidate Findings/);
+});
+
+test("QC run rejects documents with accepted major findings", async () => {
+  const root = ".tmp/qc-accepted-finding/data/clients";
+  await fs.rm(".tmp/qc-accepted-finding", { recursive: true, force: true });
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.normalizedDir, { recursive: true });
+  const targetPath = path.join(scope.normalizedDir, "target.md");
+  await fs.copyFile("data/demo/target/batch-record.md", targetPath);
+  const ruleset: Ruleset = {
+    rulesetId: "RULESET-SOP-DEMO-001",
+    sopDocumentId: "SOP-DEMO-001",
+    sopFileName: "document-control-sop.md",
+    title: "Rules",
+    status: "approved",
+    generatedAt: "now",
+    rules: [sampleRule("approved")]
+  };
+  await writeJson(path.join(scope.rulesetsApprovedDir, `${ruleset.rulesetId}.json`), ruleset);
+
+  const result = await runQc(targetPath, new AcceptedFindingProvider(), scope);
+  assert.equal(result.accepted.length, 1);
+  assert.equal(result.finalDecision, "REJECT");
 });
 
 test("graph serialization and finding lineage resolve", async () => {

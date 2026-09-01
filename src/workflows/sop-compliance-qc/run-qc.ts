@@ -79,7 +79,8 @@ function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: numb
 
 function qcFinalDecision(params: { accepted: QcFinding[]; humanReview: QcFinding[]; rejected: QcFinding[] }): "ACCEPT" | "HUMAN_REVIEW" | "REJECT" {
   if (params.humanReview.length > 0) return "HUMAN_REVIEW";
-  if (params.accepted.length > 0) return "ACCEPT";
+  if (params.accepted.some((finding) => finding.severity === "critical" || finding.severity === "major")) return "REJECT";
+  if (params.accepted.length > 0) return "HUMAN_REVIEW";
   if (params.rejected.length > 0) return "REJECT";
   return "ACCEPT";
 }
