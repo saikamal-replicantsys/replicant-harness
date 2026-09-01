@@ -9,6 +9,7 @@ import { MarkdownDocumentAdapter } from "../src/documents/markdown.adapter.js";
 import { DocxDocumentAdapter } from "../src/documents/docx.adapter.js";
 import { XlsxDocumentAdapter } from "../src/documents/xlsx.adapter.js";
 import { UnsupportedDocDocumentAdapter } from "../src/documents/doc.adapter.js";
+import { YamlDocumentAdapter } from "../src/documents/yaml.adapter.js";
 import { loadApprovedRules, writeJson } from "../src/workflows/sop-compliance-qc/store.js";
 import { GraphStore } from "../src/knowledge/graph.store.js";
 import type { Ruleset, SopRule } from "../src/harness/contracts/rule.js";
@@ -99,6 +100,21 @@ test("Markdown normalization writes client-scoped markdown and metadata", async 
   assert.match(markdown, /# SOP/);
   assert.equal(metadata.clientId, "alpha");
   assert.equal(metadata.blocks[0]?.location.paragraphIndex, 1);
+});
+
+test("YAML normalization preserves rule-like sections", async () => {
+  await reset();
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.sourceDir, { recursive: true });
+  await fs.writeFile(path.join(scope.sourceDir, "method.yaml"), "name: Analytical Method Development Rules\n\nrules:\n- id: AMD-001\n  requirement: Follow the SOP.\n", "utf8");
+
+  const result = await ingestClient(scope, [new YamlDocumentAdapter()]);
+  assert.equal(result.converted.length, 1);
+  const metadata = JSON.parse(await fs.readFile(path.join(scope.normalizedDir, "method.metadata.json"), "utf8")) as { fileType: string; title: string };
+  const markdown = await fs.readFile(path.join(scope.normalizedDir, "method.md"), "utf8");
+  assert.equal(metadata.fileType, "yaml");
+  assert.equal(metadata.title, "Analytical Method Development Rules");
+  assert.match(markdown, /### Rule AMD-001/);
 });
 
 test("DOCX normalization preserves headings and paragraph locations", async () => {

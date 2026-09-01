@@ -30,7 +30,7 @@ export interface ClientIngestResult {
   outputDir: string;
 }
 
-const knownExtensions = new Set([".md", ".docx", ".xlsx", ".doc"]);
+const knownExtensions = new Set([".md", ".docx", ".xlsx", ".yaml", ".yml", ".doc"]);
 
 function findAdapter(filePath: string, adapters: DocumentAdapter[]): DocumentAdapter | undefined {
   return adapters.find((adapter) => adapter.supports(filePath));
@@ -72,7 +72,7 @@ export async function ingestClient(scope: ClientScope, adapters = defaultDocumen
 
   for (const filePath of files) {
     const ext = path.extname(filePath).toLowerCase();
-    const label = ext === ".md" ? "markdown" : ext.replace(".", "");
+    const label = ext === ".md" ? "markdown" : ext === ".yml" ? "yaml" : ext.replace(".", "");
     counts[label] = (counts[label] ?? 0) + 1;
     if (!knownExtensions.has(ext)) {
       counts.unsupported += 1;

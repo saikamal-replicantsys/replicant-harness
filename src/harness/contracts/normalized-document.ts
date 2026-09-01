@@ -1,6 +1,6 @@
 export type DocumentType = "sop" | "target";
 export type NormalizedBlockType = "heading" | "paragraph" | "bullet" | "numbered" | "table";
-export type NormalizedFileType = "markdown" | "docx" | "xlsx" | "doc";
+export type NormalizedFileType = "markdown" | "docx" | "xlsx" | "yaml" | "doc";
 
 export interface NormalizedLocation {
   page?: number;

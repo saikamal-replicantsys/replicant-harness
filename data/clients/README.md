@@ -15,7 +15,7 @@ data/clients/<client-id>/
   graph.json
 ```
 
-Place source `.md`, `.docx`, or `.xlsx` files under `source/`, then run:
+Place source `.md`, `.yaml`, `.yml`, `.docx`, or `.xlsx` files under `source/`, then run:
 
 ```bash
 npm run ingest -- --client <client-id>

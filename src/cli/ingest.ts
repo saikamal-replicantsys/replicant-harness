@@ -18,6 +18,7 @@ async function main(): Promise<void> {
   console.log(pad("DOCX", result.counts.docx ?? 0));
   console.log(pad("DOC", result.counts.doc ?? 0));
   console.log(pad("XLSX", result.counts.xlsx ?? 0));
+  console.log(pad("YAML", result.counts.yaml ?? 0));
   console.log(pad("Markdown", result.counts.markdown ?? 0));
   console.log("");
   console.log(pad("Converted", result.converted.length));

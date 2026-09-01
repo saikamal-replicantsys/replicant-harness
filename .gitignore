@@ -27,5 +27,6 @@ data/clients/*/findings/*
 data/clients/*/reports/*
 data/clients/*/traces/*
 data/clients/*/graph.json
+data/clients/*/obsolete/
 /lambda/
 /test-sop/
