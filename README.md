@@ -456,3 +456,50 @@ The conceptual old-QC adapter writes `data/findings/<target>.old-qc.json` and in
 - Semantic evaluators use AI in real mode and are therefore probabilistic.
 - Human approval of rules remains mandatory.
 - This POC must not be used as an unattended regulatory decision system.
+
+
+--------
+
+Lambda Client:
+
+1. Ingest: 
+
+npm run ingest -- --client lambda
+
+2. Generate rules from SOP / reference docs:
+
+npm run rules -- --client lambda "data/clients/lambda/normalized/SP-LBD-GNL-093-00 Analyticle method development.md"
+3. Approve generated rulesets:
+
+npm run approve-rules -- --client lambda RULESET-SOP-SP-LBD-GNL-093-00-ANALYTICLE-METHOD-DEVELOPMENT --all
+
+4. Run QC against result workbooks:
+
+npm run qc -- --client lambda "data/clients/lambda/normalized/Results1.md"
+npm run qc -- --client lambda "data/clients/lambda/normalized/Results(1).md"
+npm run qc -- --client lambda "data/clients/lambda/normalized/Results.md"
+npm run qc -- --client lambda "data/clients/lambda/normalized/Results_002.md"
+npm run qc -- --client lambda "data/clients/lambda/normalized/Results_005.md"
+
+____________
+
+Test SOP Client
+
+1. Ingest: 
+
+npm run ingest -- --client test-sop
+
+2. Generate rules from SOP / reference docs:
+
+npm run rules -- --client test-sop "data/clients/test-sop/normalized/Vendor Approval SOP _Sample ref.md"
+
+3. Approve generated rulesets:
+
+npm run approve-rules -- --client test-sop RULESET-SOP-VENDOR-APPROVAL-SOP-SAMPLE-REF
+
+4. Run QC against result workbooks:
+
+npm run qc -- --client test-sop data/clients/test-sop/normalized/Annex-2.md
+npm run qc -- --client test-sop data/clients/test-sop/normalized/Annex-3.md
+npm run qc -- --client test-sop data/clients/test-sop/normalized/Annex-4.md
+npm run qc -- --client test-sop data/clients/test-sop/normalized/Annex-5.md
