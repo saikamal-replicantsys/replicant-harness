@@ -27,6 +27,7 @@ interface YamlRulesDocument {
     filename?: string;
     title?: string;
   };
+  system?: string;
   rules?: YamlRule[];
 }
 
@@ -52,7 +53,7 @@ function text(value: unknown): string {
 }
 
 function blocksForRule(sop: NormalizedDocument, ruleId: string, sourceText: string): string[] {
-  const headingIndex = sop.blocks.findIndex((block) => block.type === "heading" && block.text === `Rule ${ruleId}`);
+  const headingIndex = sop.blocks.findIndex((block) => block.type === "heading" && (block.text === `Rule ${ruleId}` || block.text.startsWith(`Rule ${ruleId}:`) || block.text.startsWith(`Rule QC-${ruleId.replace(/^QC-/, "")}:`)));
   if (headingIndex === -1) {
     const match = sop.blocks.find((block) => sourceText && sourceText.includes(block.text));
     return match ? [match.blockId] : [sop.blocks[0]?.blockId].filter((blockId): blockId is string => Boolean(blockId));
@@ -78,6 +79,115 @@ function grounding(rule: YamlRule): GroundingEvaluation {
   };
 }
 
+function ruleFromPrompt(params: {
+  ruleId: string;
+  title: string;
+  statement: string;
+  description?: string;
+  severity: RuleSeverity;
+  section?: string;
+  category?: string;
+  sourceText?: string;
+}): YamlRule {
+  return {
+    id: params.ruleId,
+    title: params.title,
+    category: params.category,
+    severity: params.severity,
+    requirement: params.statement,
+    expected: params.description ?? params.statement,
+    check_type: params.category ?? "presence",
+    source: {
+      section: params.section,
+      quote: params.sourceText ?? params.statement,
+      quote_verified: true
+    }
+  };
+}
+
+function severityFromBracket(textValue: string): RuleSeverity {
+  const sourceSeverity = textValue.match(/source severity=([a-z]+)/i)?.[1]?.toLowerCase();
+  if (sourceSeverity) return asSeverity(sourceSeverity);
+  const outputSeverity = textValue.match(/\b(high|medium|low)\b/i)?.[1]?.toLowerCase();
+  if (outputSeverity === "high") return "critical";
+  if (outputSeverity === "medium") return "major";
+  if (outputSeverity === "low") return "minor";
+  return "major";
+}
+
+function extractLineValue(block: string, label: string): string {
+  const match = block.match(new RegExp(`^\\s*${label}:\\s*(.+)$`, "im"));
+  return text(match?.[1]);
+}
+
+function promptRules(systemText: string): YamlRule[] {
+  const normalized = systemText.replace(/\r\n?/g, "\n");
+  const rules: YamlRule[] = [];
+
+  for (const match of normalized.matchAll(/^RULE\s+([A-Z]\d*)\s+[-—]\s+(.+)$/gm)) {
+    const start = match.index ?? 0;
+    const next = normalized.slice(start + match[0].length).search(/\nRULE\s+[A-Z]\d*\s+[-—]|\n[=─-]{8,}/);
+    const body = next === -1 ? normalized.slice(start) : normalized.slice(start, start + match[0].length + next);
+    const ruleId = `QC-${match[1]}`;
+    rules.push(ruleFromPrompt({
+      ruleId,
+      title: text(match[2]),
+      statement: body.replace(match[0], "").trim(),
+      severity: /severity\s+"?high/i.test(body) ? "critical" : /severity\s+"?low/i.test(body) ? "minor" : "major",
+      section: "Baseline QC Rules",
+      category: /tense/i.test(body) ? "grammar" : /spelling|english/i.test(body) ? "spelling" : /title case|format/i.test(body) ? "format" : "qc",
+      sourceText: body.trim()
+    }));
+  }
+
+  const sopRulesStart = normalized.search(/\nSOP RULES\s*\n/i);
+  if (sopRulesStart !== -1) {
+    const sopText = normalized.slice(sopRulesStart);
+    const sopMatches = Array.from(sopText.matchAll(/^- ([A-Z]+-\d+)\s+\[([^\]]+)\]\s+(.+?)(?=\n- [A-Z]+-\d+\s+\[|\s*$)/gms));
+    for (const match of sopMatches) {
+      const ruleId = text(match[1]);
+      const bracket = text(match[2]);
+      const body = text(match[3]);
+      const titleLine = body.split("\n")[0]?.trim() ?? ruleId;
+      const requirement = extractLineValue(body, "Requirement") || titleLine;
+      const appliesTo = extractLineValue(body, "Applies to");
+      const condition = extractLineValue(body, "Condition") || "always";
+      const expected = extractLineValue(body, "Expected evidence") || requirement;
+      const category = bracket.match(/category=([a-z0-9_-]+)/i)?.[1];
+      rules.push({
+        id: ruleId,
+        title: titleLine,
+        category,
+        severity: severityFromBracket(bracket),
+        requirement,
+        applies_to: appliesTo ? appliesTo.split(",").map((item) => item.trim()).filter(Boolean) : undefined,
+        condition,
+        expected,
+        check_type: category ?? "presence",
+        source: {
+          section: "SOP RULES",
+          quote: body,
+          quote_verified: true
+        }
+      });
+    }
+  }
+
+  if (/DETECT ALL ERROR TYPES/i.test(normalized)) {
+    rules.push(ruleFromPrompt({
+      ruleId: "QC-ERROR-TYPES",
+      title: "Detect scientific, numeric, writing, formatting, structural, and consistency errors",
+      statement: "Detect scientific incorrectness, numeric mismatch, process errors, specification violations, data integrity issues, grammar, spelling, formatting, structural issues, reference errors, missing information, and inconsistencies.",
+      severity: "major",
+      section: "Detect All Error Types",
+      category: "qc",
+      sourceText: "Scientific-Incorrect; Numeric-Mismatch; Process-Error; Spec-Violation; Data-Integrity; Grammar; Spelling; Formatting; Structural; Reference-Error; Missing-Info; Inconsistency."
+    }));
+  }
+
+  return rules;
+}
+
 export async function readNormalizedMetadata(normalizedPath: string): Promise<NormalizedMetadata | undefined> {
   const metadataPath = path.join(path.dirname(normalizedPath), `${path.basename(normalizedPath, path.extname(normalizedPath))}.metadata.json`);
   try {
@@ -90,7 +200,7 @@ export async function readNormalizedMetadata(normalizedPath: string): Promise<No
 export async function buildYamlRuleset(sourceFile: string, sop: NormalizedDocument, generatedAt = new Date().toISOString()): Promise<Ruleset> {
   const raw = await fs.readFile(sourceFile, "utf8");
   const parsed = YAML.parse(raw) as YamlRulesDocument;
-  const rules = Array.isArray(parsed.rules) ? parsed.rules : [];
+  const rules = Array.isArray(parsed.rules) ? parsed.rules : typeof parsed.system === "string" ? promptRules(parsed.system) : [];
   const rulesetId = `RULESET-${sop.documentId}`;
 
   const sopRules: SopRule[] = rules.filter((rule) => text(rule.id)).map((rule): SopRule => {

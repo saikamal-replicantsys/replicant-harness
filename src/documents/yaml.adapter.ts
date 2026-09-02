@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import YAML from "yaml";
 import type { DocumentAdapter, DocumentParseOptions } from "./document-adapter.js";
 import type { DocumentType, NormalizedBlock, NormalizedBlockType, NormalizedDocument } from "./normalized-document.js";
 import { deterministicBlockId, slugId } from "./document-ids.js";
@@ -11,6 +12,12 @@ function firstScalarValue(raw: string, key: string): string | undefined {
 }
 
 function blockFromYamlLine(line: string): { type: NormalizedBlockType; text: string; level?: number } {
+  const promptRule = line.match(/^RULE\s+([A-Z]\d*)\s+[-—]\s+(.+)$/);
+  if (promptRule) return { type: "heading", text: `Rule QC-${promptRule[1]}: ${normalizeText(promptRule[2] ?? "")}`, level: 3 };
+
+  const sopRule = line.match(/^-\s+([A-Z]+-\d+)\s+\[([^\]]+)\]\s+(.+)$/);
+  if (sopRule) return { type: "heading", text: `Rule ${sopRule[1]}: ${normalizeText(sopRule[3] ?? "")}`, level: 3 };
+
   const topLevel = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
   if (topLevel) {
     const value = topLevel[2]?.trim();
@@ -35,8 +42,9 @@ export class YamlDocumentAdapter implements DocumentAdapter {
     if (!this.supports(filePath)) throw new Error(`YamlDocumentAdapter only supports .yaml/.yml files: ${filePath}`);
     const parseOptions = typeof options === "string" ? { documentType: options } : options;
     const raw = await fs.readFile(filePath, "utf8");
+    const parsedYaml = YAML.parse(raw) as { system?: unknown; name?: unknown; title?: unknown };
     const documentId = slugId(filePath, parseOptions.documentType);
-    const title = firstScalarValue(raw, "name") ?? firstScalarValue(raw, "title") ?? path.basename(filePath, path.extname(filePath));
+    const title = typeof parsedYaml.name === "string" ? parsedYaml.name : typeof parsedYaml.title === "string" ? parsedYaml.title : firstScalarValue(raw, "name") ?? firstScalarValue(raw, "title") ?? path.basename(filePath, path.extname(filePath));
     const blocks: NormalizedBlock[] = [];
     let currentSection = title;
 
@@ -49,7 +57,8 @@ export class YamlDocumentAdapter implements DocumentAdapter {
       location: { section: title, blockId: titleBlockId }
     });
 
-    for (const [lineIndex, rawLine] of raw.replace(/\r\n?/g, "\n").split("\n").entries()) {
+    const content = typeof parsedYaml.system === "string" ? parsedYaml.system : raw;
+    for (const [lineIndex, rawLine] of content.replace(/\r\n?/g, "\n").split("\n").entries()) {
       const line = rawLine.trimEnd();
       if (!line.trim() || line.trim() === "---") continue;
       const parsed = blockFromYamlLine(line);
