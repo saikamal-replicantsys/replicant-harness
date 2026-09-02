@@ -1,4 +1,5 @@
 import { ingestClient } from "../client/ingest-client.js";
+import type { ClientIngestKind } from "../client/ingest-client.js";
 import { inferLeadingClientArg, parseClientArg, resolveClientScope } from "../client/client-scope.js";
 
 function pad(label: string, value: string | number): string {
@@ -9,15 +10,34 @@ async function main(): Promise<void> {
   const parsed = parseClientArg(process.argv.slice(2));
   const inferred = parsed.clientId ? parsed : inferLeadingClientArg(parsed.rest);
   const clientId = inferred.clientId;
-  const rest = inferred.rest;
-  if (!clientId || rest.length > 0) throw new Error("Usage: npm run ingest -- --client <client-id>");
+  const rest = [...inferred.rest];
+  let kind: ClientIngestKind = "source";
+  const kindIndex = rest.indexOf("--kind");
+  if (kindIndex !== -1) {
+    const value = rest[kindIndex + 1];
+    if (value !== "source" && value !== "evidence" && value !== "target") throw new Error("--kind must be source, evidence, or target");
+    kind = value;
+    rest.splice(kindIndex, 2);
+  } else {
+    const npmKind = process.env.npm_config_kind;
+    if (npmKind === "source" || npmKind === "evidence" || npmKind === "target") {
+      kind = npmKind;
+      const forwardedIndex = rest.indexOf(npmKind);
+      if (forwardedIndex !== -1) rest.splice(forwardedIndex, 1);
+    } else if (rest[0] === "source" || rest[0] === "evidence" || rest[0] === "target") {
+      kind = rest.shift() as ClientIngestKind;
+    }
+  }
+  if (!clientId || rest.length > 0) throw new Error("Usage: npm run ingest -- --client <client-id> [--kind source|evidence|target]");
 
-  const result = await ingestClient(resolveClientScope(clientId));
+  const result = await ingestClient(resolveClientScope(clientId), undefined, { kind });
   console.log(`Client: ${result.clientId}\n`);
+  console.log(pad("Kind", kind));
   console.log(pad("Files discovered", result.discovered));
   console.log(pad("DOCX", result.counts.docx ?? 0));
   console.log(pad("DOC", result.counts.doc ?? 0));
   console.log(pad("XLSX", result.counts.xlsx ?? 0));
+  console.log(pad("PDF", result.counts.pdf ?? 0));
   console.log(pad("YAML", result.counts.yaml ?? 0));
   console.log(pad("Markdown", result.counts.markdown ?? 0));
   console.log("");

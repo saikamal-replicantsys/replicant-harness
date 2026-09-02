@@ -80,6 +80,21 @@ export const findingsSchema = {
             },
             required: ["documentId", "blockIds", "observedText"]
           },
+          evidenceSources: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                documentId: { type: "string" },
+                fileName: { type: "string" },
+                sourceFile: { type: "string" },
+                blockIds: { type: "array", items: { type: "string" } },
+                section: { type: "string" },
+                observedText: { type: "string" }
+              },
+              required: ["documentId", "blockIds", "observedText"]
+            }
+          },
           rule: {
             type: "object",
             properties: {

@@ -3,6 +3,7 @@ import type { SopRule } from "../../harness/contracts/rule.js";
 
 export function buildClientReport(params: {
   targetTitle: string;
+  evidenceTitles?: string[];
   rulesetsLoaded: number;
   rulesEvaluated: number;
   finalDecision: "ACCEPT" | "HUMAN_REVIEW" | "REJECT";
@@ -11,6 +12,17 @@ export function buildClientReport(params: {
   rejected: QcFinding[];
   approvedRules: SopRule[];
 }): string {
+  const evidenceBlock = (finding: QcFinding): string => {
+    if (!finding.evidenceSources?.length) return "None.";
+    return finding.evidenceSources.map((source) => [
+      `- Source: ${source.fileName ?? source.documentId}`,
+      source.sourceFile ? `  File: ${source.sourceFile}` : undefined,
+      source.section ? `  Section/Sheet: ${source.section}` : undefined,
+      `  Blocks: ${source.blockIds.join(", ")}`,
+      `  Evidence: "${source.observedText}"`
+    ].filter(Boolean).join("\n")).join("\n");
+  };
+
   const findingBlock = (finding: QcFinding) => `### ${finding.findingId} - ${finding.title}
 
 Severity: ${finding.severity}
@@ -42,6 +54,9 @@ SOP Evidence:
 Target Evidence:
 "${finding.target.observedText}"
 
+Supporting Source Evidence:
+${evidenceBlock(finding)}
+
 Harness Validation:
 - Rule exists: ${finding.evaluation.ruleExists ? "PASS" : "FAIL"}
 - Rule approved: ${finding.evaluation.ruleApproved ? "PASS" : "FAIL"}
@@ -59,6 +74,9 @@ ${finding.evaluation.reason ?? "No evaluator reason supplied."}
 
 Document:
 ${params.targetTitle}
+
+Supporting Source Documents:
+${params.evidenceTitles?.length ? params.evidenceTitles.map((title) => `- ${title}`).join("\n") : "None."}
 
 Approved Rulesets:
 ${params.rulesetsLoaded}

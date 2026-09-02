@@ -19,6 +19,7 @@
     "sop-qc",
     "client-scoped-ingestion",
     "docx",
+    "pdf",
     "xlsx"
   ],
   "repository": {
@@ -33,6 +34,7 @@
     "rules": "tsx src/cli/generate-rules.ts",
     "approve-rules": "tsx src/cli/approve-rules.ts",
     "qc": "tsx src/cli/run-qc.ts",
+    "qc:case": "tsx src/cli/run-qc-case.ts",
     "lineage": "tsx src/cli/lineage.ts",
     "evaluate": "tsx tools/evaluate-documents.ts",
     "evaluate:batch": "tsx tools/evaluate-batch.ts",
@@ -53,6 +55,7 @@
     "fast-xml-parser": "^5.11.0",
     "jszip": "^3.10.1",
     "mammoth": "^1.12.1",
+    "pdf-parse": "^2.4.5",
     "yaml": "^2.9.0"
   }
 }

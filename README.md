@@ -402,7 +402,10 @@ Client folders are filesystem scopes for local POC testing, not an authenticatio
 ```text
 data/clients/<client-id>/
   source/
+  evidence/
   normalized/
+    evidence/
+    target/
   rulesets/
     generated/
     approved/
@@ -420,6 +423,7 @@ Supported ingestion formats:
 - Markdown (`.md`)
 - Word DOCX (`.docx`)
 - Excel workbook (`.xlsx`)
+- PDF (`.pdf`) for text/content extraction
 - Legacy Word DOC (`.doc`) is detected but not parsed; convert it to `.docx` first.
 
 Each source file in `source/` produces:
@@ -428,6 +432,43 @@ Each source file in `source/` produces:
 - `normalized/<file>.metadata.json`
 
 Metadata records the client id, source file, normalized file, title, block ids, block types, and source locations. XLSX ingestion keeps sheet names and cell references in block metadata so future findings can cite locations such as `Sheet: Results`, `Cell: D14`.
+
+Target and evidence folders can be ingested separately:
+
+```bash
+npm run ingest -- --client lambda --kind source
+npm run ingest -- --client lambda --kind evidence
+npm run ingest -- --client lambda --kind target
+```
+
+`source` is the backwards-compatible SOP/source folder and writes to `normalized/`. `evidence` writes to `normalized/evidence/`. `target` writes to `normalized/target/`.
+
+## Client QC Case Flow
+
+For pharma POCs where an MDR or other reviewed document must be checked against the approved SOP ruleset using all supporting workbooks/source files, use the case command:
+
+```bash
+npm run qc:case -- --client lambda --target "data/clients/lambda/target/MDR_NRCESDS_updated-QCed.docx" --evidence all
+```
+
+The case runner:
+
+- normalizes the target DOCX into `data/clients/lambda/normalized/target/`
+- uses normalized supporting source/evidence Markdown from the client scope
+- loads approved rules only from `data/clients/lambda/rulesets/approved/`
+- sends Gemini the reviewed target, supporting source documents, and approved rules
+- requires findings to cite exact `ruleId`, `rulesetId`, SOP source block ids, target block ids, and supporting evidence block ids when used
+- validates all citations before accepting findings
+- writes client-scoped findings, report, trace, and graph updates
+
+Case outputs use:
+
+```text
+data/clients/<client-id>/findings/<target>.case.findings.json
+data/clients/<client-id>/reports/<target>-case-qc-report.md
+data/clients/<client-id>/traces/QC-CASE-*.json
+data/clients/<client-id>/graph.json
+```
 
 ## SOP QC Outputs
 
@@ -446,6 +487,7 @@ The conceptual old-QC adapter writes `data/findings/<target>.old-qc.json` and in
 ## SOP QC Limitations
 
 - Client ingestion supports Markdown, DOCX, and XLSX; SOP/QC workflows consume normalized Markdown.
+- PDF ingestion extracts text blocks for content QC; it does not validate visual layout, coordinates, signatures, scanned images, or page-perfect formatting.
 - Legacy `.doc` files require manual conversion to `.docx`.
 - No OCR.
 - No page-coordinate mapping.

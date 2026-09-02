@@ -30,18 +30,30 @@ export interface ClientIngestResult {
   outputDir: string;
 }
 
-const knownExtensions = new Set([".md", ".docx", ".xlsx", ".yaml", ".yml", ".doc"]);
+export type ClientIngestKind = "source" | "evidence" | "target";
+
+export interface ClientIngestOptions {
+  kind?: ClientIngestKind;
+}
+
+const knownExtensions = new Set([".md", ".docx", ".xlsx", ".yaml", ".yml", ".doc", ".pdf"]);
 
 function findAdapter(filePath: string, adapters: DocumentAdapter[]): DocumentAdapter | undefined {
   return adapters.find((adapter) => adapter.supports(filePath));
 }
 
-function outputPaths(scope: ClientScope, sourceFile: string): { markdownPath: string; metadataPath: string } {
+function directoryForKind(scope: ClientScope, kind: ClientIngestKind): { inputDir: string; outputDir: string; documentType: "sop" | "target" | "evidence" } {
+  if (kind === "target") return { inputDir: scope.targetDir, outputDir: path.join(scope.normalizedDir, "target"), documentType: "target" };
+  if (kind === "evidence") return { inputDir: scope.evidenceDir, outputDir: path.join(scope.normalizedDir, "evidence"), documentType: "evidence" };
+  return { inputDir: scope.sourceDir, outputDir: scope.normalizedDir, documentType: "sop" };
+}
+
+function outputPaths(outputDir: string, sourceFile: string): { markdownPath: string; metadataPath: string } {
   const baseName = path.basename(sourceFile, path.extname(sourceFile));
-  const markdownPath = path.join(scope.normalizedDir, `${baseName}.md`);
-  const metadataPath = path.join(scope.normalizedDir, `${baseName}.metadata.json`);
-  assertPathInside(markdownPath, scope.normalizedDir);
-  assertPathInside(metadataPath, scope.normalizedDir);
+  const markdownPath = path.join(outputDir, `${baseName}.md`);
+  const metadataPath = path.join(outputDir, `${baseName}.metadata.json`);
+  assertPathInside(markdownPath, outputDir);
+  assertPathInside(metadataPath, outputDir);
   return { markdownPath, metadataPath };
 }
 
@@ -61,11 +73,43 @@ function metadataFor(document: NormalizedDocument): Record<string, unknown> {
   };
 }
 
-export async function ingestClient(scope: ClientScope, adapters = defaultDocumentAdapters()): Promise<ClientIngestResult> {
+export async function normalizeSourceFile(params: {
+  filePath: string;
+  outputDir: string;
+  documentType: "sop" | "target" | "evidence";
+  clientId: string;
+  adapters?: DocumentAdapter[];
+}): Promise<IngestedFile> {
+  const adapters = params.adapters ?? defaultDocumentAdapters();
+  const adapter = findAdapter(params.filePath, adapters);
+  if (!adapter) throw new Error(`No adapter found for ${path.extname(params.filePath).toLowerCase()}`);
+  await fs.mkdir(params.outputDir, { recursive: true });
+  const { markdownPath, metadataPath } = outputPaths(params.outputDir, params.filePath);
+  const document = await adapter.parse(params.filePath, {
+    documentType: params.documentType,
+    clientId: params.clientId,
+    normalizedFile: markdownPath
+  });
+  document.sourceFile = params.filePath;
+  document.normalizedFile = markdownPath;
+  await fs.writeFile(markdownPath, normalizedToMarkdown(document), "utf8");
+  await fs.writeFile(metadataPath, `${JSON.stringify(metadataFor(document), null, 2)}\n`, "utf8");
+  return {
+    sourceFile: params.filePath,
+    normalizedFile: markdownPath,
+    metadataFile: metadataPath,
+    fileType: document.fileType,
+    blocks: document.blocks.length
+  };
+}
+
+export async function ingestClient(scope: ClientScope, adapters = defaultDocumentAdapters(), options: ClientIngestOptions = {}): Promise<ClientIngestResult> {
   await ensureClientScope(scope);
-  const entries = await fs.readdir(scope.sourceDir, { withFileTypes: true }).catch(() => []);
-  const files = entries.filter((entry) => entry.isFile()).map((entry) => path.join(scope.sourceDir, entry.name));
-  const counts: Record<string, number> = { docx: 0, doc: 0, xlsx: 0, markdown: 0, unsupported: 0 };
+  const kind = options.kind ?? "source";
+  const dirs = directoryForKind(scope, kind);
+  const entries = await fs.readdir(dirs.inputDir, { withFileTypes: true }).catch(() => []);
+  const files = entries.filter((entry) => entry.isFile()).map((entry) => path.join(dirs.inputDir, entry.name));
+  const counts: Record<string, number> = { docx: 0, doc: 0, xlsx: 0, yaml: 0, markdown: 0, pdf: 0, unsupported: 0 };
   const converted: IngestedFile[] = [];
   const warnings: string[] = [];
   const failed: IngestFailure[] = [];
@@ -87,23 +131,13 @@ export async function ingestClient(scope: ClientScope, adapters = defaultDocumen
     }
 
     try {
-      const { markdownPath, metadataPath } = outputPaths(scope, filePath);
-      const document = await adapter.parse(filePath, {
-        documentType: "sop",
+      converted.push(await normalizeSourceFile({
+        filePath,
+        outputDir: dirs.outputDir,
+        documentType: dirs.documentType,
         clientId: scope.clientId,
-        normalizedFile: markdownPath
-      });
-      document.sourceFile = filePath;
-      document.normalizedFile = markdownPath;
-      await fs.writeFile(markdownPath, normalizedToMarkdown(document), "utf8");
-      await fs.writeFile(metadataPath, `${JSON.stringify(metadataFor(document), null, 2)}\n`, "utf8");
-      converted.push({
-        sourceFile: filePath,
-        normalizedFile: markdownPath,
-        metadataFile: metadataPath,
-        fileType: document.fileType,
-        blocks: document.blocks.length
-      });
+        adapters
+      }));
     } catch (error) {
       failed.push({ sourceFile: filePath, reason: error instanceof Error ? error.message : String(error) });
     }
@@ -116,6 +150,6 @@ export async function ingestClient(scope: ClientScope, adapters = defaultDocumen
     converted,
     warnings,
     failed,
-    outputDir: scope.normalizedDir
+    outputDir: dirs.outputDir
   };
 }

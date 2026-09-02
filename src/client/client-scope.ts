@@ -6,6 +6,7 @@ export interface ClientScope {
   clientId: string;
   rootDir: string;
   sourceDir: string;
+  evidenceDir: string;
   normalizedDir: string;
   targetDir: string;
   rulesetsDir: string;
@@ -55,6 +56,7 @@ export function resolveClientScope(clientId: string, dataRoot = "data/clients"):
     clientId,
     rootDir,
     sourceDir: path.join(rootDir, "source"),
+    evidenceDir: path.join(rootDir, "evidence"),
     normalizedDir: path.join(rootDir, "normalized"),
     targetDir: path.join(rootDir, "target"),
     rulesetsDir: path.join(rootDir, "rulesets"),
@@ -70,6 +72,7 @@ export function resolveClientScope(clientId: string, dataRoot = "data/clients"):
 export async function ensureClientScope(scope: ClientScope): Promise<void> {
   await Promise.all([
     fs.mkdir(scope.sourceDir, { recursive: true }),
+    fs.mkdir(scope.evidenceDir, { recursive: true }),
     fs.mkdir(scope.normalizedDir, { recursive: true }),
     fs.mkdir(scope.targetDir, { recursive: true }),
     fs.mkdir(scope.rulesetsGeneratedDir, { recursive: true }),

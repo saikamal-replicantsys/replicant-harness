@@ -103,6 +103,23 @@ test("Markdown normalization writes client-scoped markdown and metadata", async 
   assert.equal(metadata.blocks[0]?.location.paragraphIndex, 1);
 });
 
+test("target and evidence ingestion write to scoped normalized subfolders", async () => {
+  await reset();
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.targetDir, { recursive: true });
+  await fs.mkdir(scope.evidenceDir, { recursive: true });
+  await fs.writeFile(path.join(scope.targetDir, "mdr.md"), "# MDR\n\nTarget content\n", "utf8");
+  await fs.writeFile(path.join(scope.evidenceDir, "results.md"), "# Results\n\nD12: Electrogram not came fine\n", "utf8");
+
+  const targetResult = await ingestClient(scope, undefined, { kind: "target" });
+  const evidenceResult = await ingestClient(scope, undefined, { kind: "evidence" });
+
+  assert.equal(targetResult.converted[0]?.normalizedFile, path.join(scope.normalizedDir, "target", "mdr.md"));
+  assert.equal(evidenceResult.converted[0]?.normalizedFile, path.join(scope.normalizedDir, "evidence", "results.md"));
+  assert.equal(JSON.parse(await fs.readFile(targetResult.converted[0]!.metadataFile, "utf8")).documentId, "TARGET-MDR");
+  assert.equal(JSON.parse(await fs.readFile(evidenceResult.converted[0]!.metadataFile, "utf8")).documentId, "EVIDENCE-RESULTS");
+});
+
 test("YAML normalization preserves rule-like sections", async () => {
   await reset();
   const scope = resolveClientScope("alpha", root);

@@ -231,3 +231,57 @@ The adapters all emit the existing `NormalizedDocument` contract:
 Client scope is passed into the existing workflows as path configuration. With `--client test-sop`, generated rulesets, approved rulesets, graph nodes, findings, reports, and traces are written only inside `data/clients/test-sop/`. QC loads approved rules only from that same client directory. This is a deterministic local filesystem boundary for the POC, not a production authorization model.
 
 Real-document safety remains explicit: ingestion does not call Gemini, does not mutate source files, and does not send whole client folders to a provider. Gemini receives only the normalized document selected by the rule-generation or QC command.
+
+## 23. Client QC Case Flow
+
+The harness now supports a case-level SOP QC flow for pharma POCs where the reviewed target document must be evaluated alongside supporting source/evidence files such as Excel result workbooks.
+
+```text
+data/clients/<client-id>/source
+  SOP YAML / SOP Markdown / source files
+        |
+        v
+Normalized SOP + supporting source Markdown
+        |
+        v
+Ruleset generation or deterministic YAML import
+        |
+        v
+Manual approval
+        |
+        v
+Approved client-scoped rules
+
+data/clients/<client-id>/target
+  MDR / reviewed DOCX
+        |
+        v
+Normalized target Markdown
+        |
+        +---------------------------+
+                                    |
+data/clients/<client-id>/evidence  |
+  optional supporting files         |
+        |                           |
+        v                           v
+Normalized evidence Markdown -> QC Case Context
+                                    |
+                                    v
+                              Gemini QC
+                                    |
+                                    v
+                         Finding validation sensors
+                                    |
+                                    v
+                    Reports + findings + trace + graph.json
+```
+
+The case workflow keeps the existing architecture:
+
+- Contracts: one `NormalizedDocument` shape for SOP, target, and source evidence.
+- Sensors: findings must reference approved rules, SOP source blocks, target blocks, and cited source evidence blocks.
+- Policies: only approved client-scoped rules can be used for QC.
+- Traces: case runs record target document id, evidence document ids, rule batches, sensor outcomes, token usage, and final decision.
+- Provenance graph: `graph.json` stores SOP, source, target, rule, finding, and block lineage.
+
+The graph is a local provenance graph. It supports lineage and auditability, but it is not a graph database, vector store, ontology reasoner, or semantic knowledge graph.

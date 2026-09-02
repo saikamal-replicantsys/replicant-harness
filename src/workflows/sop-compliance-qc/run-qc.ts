@@ -5,6 +5,7 @@ import type { ClientScope } from "../../client/client-scope.js";
 import type { AIProvider } from "../../providers/provider.js";
 import { MarkdownDocumentAdapter } from "../../documents/markdown.adapter.js";
 import type { QcFinding } from "../../harness/contracts/finding.js";
+import type { FindingEvidenceSource } from "../../harness/contracts/finding.js";
 import type { FindingCandidateResponse } from "./workflow.types.js";
 import type { QcRunResult } from "./workflow.types.js";
 import { loadApprovedRules, writeJson } from "./store.js";
@@ -26,7 +27,22 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? value as Record<string, unknown> : {};
 }
 
-function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: number): QcFinding {
+function coerceEvidenceSources(value: unknown): FindingEvidenceSource[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    const record = asRecord(item);
+    return {
+      documentId: typeof record.documentId === "string" ? record.documentId : "",
+      fileName: typeof record.fileName === "string" ? record.fileName : undefined,
+      sourceFile: typeof record.sourceFile === "string" ? record.sourceFile : undefined,
+      blockIds: asStringArray(record.blockIds),
+      section: typeof record.section === "string" ? record.section : undefined,
+      observedText: typeof record.observedText === "string" ? record.observedText : ""
+    };
+  });
+}
+
+export function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: number): QcFinding {
   const raw = asRecord(candidate);
   const target = asRecord(raw.target);
   const rule = asRecord(raw.rule);
@@ -48,6 +64,7 @@ function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: numb
       section: typeof target.section === "string" ? target.section : undefined,
       observedText: typeof target.observedText === "string" ? target.observedText : ""
     },
+    evidenceSources: coerceEvidenceSources(raw.evidenceSources),
     rule: {
       ruleId: typeof rule.ruleId === "string" ? rule.ruleId : "",
       rulesetId: typeof rule.rulesetId === "string" ? rule.rulesetId : "",
@@ -77,7 +94,7 @@ function coerceFinding(candidate: Partial<QcFinding>, runId: string, index: numb
   };
 }
 
-function qcFinalDecision(params: { accepted: QcFinding[]; humanReview: QcFinding[]; rejected: QcFinding[] }): "ACCEPT" | "HUMAN_REVIEW" | "REJECT" {
+export function qcFinalDecision(params: { accepted: QcFinding[]; humanReview: QcFinding[]; rejected: QcFinding[] }): "ACCEPT" | "HUMAN_REVIEW" | "REJECT" {
   if (params.humanReview.length > 0) return "HUMAN_REVIEW";
   if (params.accepted.some((finding) => finding.severity === "critical" || finding.severity === "major")) return "REJECT";
   if (params.accepted.length > 0) return "HUMAN_REVIEW";

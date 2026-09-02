@@ -39,11 +39,11 @@ export class GraphStore {
   }
 
   async addDocument(document: NormalizedDocument): Promise<void> {
-    const type = document.documentType === "sop" ? "SOP_DOCUMENT" : "TARGET_DOCUMENT";
-    const nodes: GraphNode[] = [{ id: document.documentId, type, properties: { name: document.title, fileName: document.fileName } }];
+    const type = document.documentType === "sop" ? "SOP_DOCUMENT" : document.documentType === "evidence" ? "SOURCE_DOCUMENT" : "TARGET_DOCUMENT";
+    const nodes: GraphNode[] = [{ id: document.documentId, type, properties: { name: document.title, fileName: document.fileName, sourceFile: document.sourceFile } }];
     const edges: GraphEdge[] = [];
     for (const block of document.blocks) {
-      nodes.push({ id: block.blockId, type: "EVIDENCE_BLOCK", properties: { text: block.text, section: block.location.section, blockType: block.type } });
+      nodes.push({ id: block.blockId, type: "EVIDENCE_BLOCK", properties: { text: block.text, section: block.location.section, sheet: block.location.sheet, cellRange: block.location.cellRange, blockType: block.type } });
       edges.push({ from: document.documentId, type: "CONTAINS", to: block.blockId });
     }
     await this.addNodesAndEdges(nodes, edges);
@@ -68,6 +68,9 @@ export class GraphStore {
       nodes.push({ id: finding.findingId, type: "FINDING", properties: { decision: finding.decision, title: finding.title, severity: finding.severity } });
       edges.push({ from: finding.rule.ruleId, type: "VIOLATED_BY", to: finding.findingId });
       for (const blockId of finding.target.blockIds) edges.push({ from: finding.findingId, type: "FOUND_IN", to: blockId });
+      for (const source of finding.evidenceSources ?? []) {
+        for (const blockId of source.blockIds) edges.push({ from: finding.findingId, type: "SUPPORTED_BY_SOURCE", to: blockId });
+      }
     }
     await this.addNodesAndEdges(nodes, edges);
   }
@@ -108,8 +111,12 @@ export class GraphStore {
     const ruleLineage = ruleId ? await this.getLineageForRule(ruleId) : undefined;
     const targetBlockIds = graph.edges.filter((edge) => edge.from === findingId && edge.type === "FOUND_IN").map((edge) => edge.to);
     const targetBlocks = graph.nodes.filter((node) => targetBlockIds.includes(node.id));
+    const sourceBlockIds = graph.edges.filter((edge) => edge.from === findingId && edge.type === "SUPPORTED_BY_SOURCE").map((edge) => edge.to);
+    const sourceBlocks = graph.nodes.filter((node) => sourceBlockIds.includes(node.id));
     const targetDocEdge = graph.edges.find((edge) => targetBlockIds.includes(edge.to) && edge.type === "CONTAINS");
     const target = graph.nodes.find((node) => node.id === targetDocEdge?.from);
-    return { finding, ...ruleLineage, target, targetBlocks };
+    const sourceDocumentIds = graph.edges.filter((edge) => sourceBlockIds.includes(edge.to) && edge.type === "CONTAINS").map((edge) => edge.from);
+    const sourceDocuments = graph.nodes.filter((node) => sourceDocumentIds.includes(node.id));
+    return { finding, ...ruleLineage, target, targetBlocks, sourceDocuments, sourceBlocks };
   }
 }

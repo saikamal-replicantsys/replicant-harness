@@ -2,6 +2,15 @@ import type { RuleSeverity } from "./rule.js";
 
 export type FindingDecision = "ACCEPTED" | "HUMAN_REVIEW" | "REJECTED";
 
+export interface FindingEvidenceSource {
+  documentId: string;
+  fileName?: string;
+  sourceFile?: string;
+  blockIds: string[];
+  section?: string;
+  observedText: string;
+}
+
 export interface QcFinding {
   findingId: string;
   runId: string;
@@ -16,6 +25,7 @@ export interface QcFinding {
     section?: string;
     observedText: string;
   };
+  evidenceSources?: FindingEvidenceSource[];
   rule: {
     ruleId: string;
     rulesetId: string;

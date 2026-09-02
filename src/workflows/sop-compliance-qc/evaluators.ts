@@ -17,15 +17,15 @@ export async function evaluateRuleGrounding(provider: AIProvider, rule: SopRule,
   return result.parsed;
 }
 
-export async function evaluateFindingGrounding(provider: AIProvider, finding: QcFinding, rule: SopRule, sopEvidence: NormalizedBlock[], targetEvidence: NormalizedBlock[]): Promise<FindingGroundingEvaluation> {
+export async function evaluateFindingGrounding(provider: AIProvider, finding: QcFinding, rule: SopRule, sopEvidence: NormalizedBlock[], targetEvidence: NormalizedBlock[], sourceEvidence: NormalizedBlock[] = []): Promise<FindingGroundingEvaluation> {
   const result = await provider.generateStructured<FindingGroundingEvaluation>({
     runId: `finding-grounding-${finding.findingId}`,
     guideId: "sop-finding-grounding",
     guideVersion: "1.0.0",
     schemaName: "finding-grounding",
     schema: findingGroundingSchema,
-    system: "Evaluate whether the approved rule and target evidence support the candidate finding. Return concise structured JSON only.",
-    prompt: JSON.stringify({ rule, sopEvidence, targetEvidence, finding })
+    system: "Evaluate whether the approved rule, target evidence, and any cited supporting source evidence support the candidate finding. Return concise structured JSON only.",
+    prompt: JSON.stringify({ rule, sopEvidence, targetEvidence, sourceEvidence, finding })
   });
   return result.parsed;
 }

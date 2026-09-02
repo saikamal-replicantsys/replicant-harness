@@ -13,6 +13,7 @@ import { GraphStore } from "../src/knowledge/graph.store.js";
 import { MockAIProvider } from "../src/providers/mock.provider.js";
 import type { AIProvider, StructuredGenerationRequest, StructuredGenerationResult } from "../src/providers/provider.js";
 import { runQc } from "../src/workflows/sop-compliance-qc/run-qc.js";
+import { runQcCase } from "../src/workflows/sop-compliance-qc/run-qc-case.js";
 import { writeJson } from "../src/workflows/sop-compliance-qc/store.js";
 
 const adapter = new MarkdownDocumentAdapter();
@@ -54,6 +55,56 @@ class AcceptedFindingProvider implements AIProvider {
           section: "Document Header",
           observedText: "No effective date was identified."
         },
+        rule: { ruleId: rule.ruleId, rulesetId: rule.rulesetId, title: rule.title },
+        sopSource: {
+          documentId: rule.source.documentId,
+          documentName: "document-control-sop.md",
+          section: rule.source.section,
+          sourceBlockIds: rule.source.sourceBlockIds,
+          sourceText: rule.source.sourceText
+        },
+        explanation: { expected: "An effective date must be present.", observed: "No effective date was identified.", reason: "Required metadata is absent." },
+        evaluation: { ruleExists: false, ruleApproved: false, ruleGrounded: false, findingGrounded: false, provenanceValid: false, score: 0 }
+      }]
+    };
+    return { provider: this.name, model: this.model, rawText: JSON.stringify(parsed), parsed: parsed as T, latencyMs: 0 };
+  }
+}
+
+class CaseFindingProvider implements AIProvider {
+  readonly name = "case-finding";
+  readonly model = "case-finding-test";
+
+  async generateStructured<T>(request: StructuredGenerationRequest): Promise<StructuredGenerationResult<T>> {
+    if (request.schemaName === "finding-grounding") {
+      const parsed = { supported: true, ruleAppliedCorrectly: true, targetEvidenceSupportsFinding: true, contradictions: [], score: 0.95, reason: "supported by target and source evidence" };
+      return { provider: this.name, model: this.model, rawText: JSON.stringify(parsed), parsed: parsed as T, latencyMs: 0 };
+    }
+    const prompt = JSON.parse(request.prompt);
+    const target = prompt.targetDocument;
+    const source = prompt.supportingSourceDocuments[0];
+    const rule = prompt.approvedRules[0];
+    const parsed = {
+      findings: [{
+        findingId: "QC-CASE-F-001",
+        decision: "ACCEPTED",
+        severity: "major",
+        title: "Effective date is missing from case target",
+        description: "The target omits the required effective date and the source workbook confirms release metadata was reviewed.",
+        target: {
+          documentId: target.documentId,
+          blockIds: target.blocks.slice(1, 2).map((block: { blockId: string }) => block.blockId),
+          section: "Document Header",
+          observedText: "No effective date appears in the target header."
+        },
+        evidenceSources: [{
+          documentId: source.documentId,
+          fileName: source.fileName,
+          sourceFile: source.sourceFile,
+          blockIds: source.blocks.slice(1, 2).map((block: { blockId: string }) => block.blockId),
+          section: "Sheet: Results",
+          observedText: "A1: Release metadata reviewed"
+        }],
         rule: { ruleId: rule.ruleId, rulesetId: rule.rulesetId, title: rule.title },
         sopSource: {
           documentId: rule.source.documentId,
@@ -189,6 +240,22 @@ test("finding missing target block ids is rejected without crashing", async () =
   assert.deepEqual(result?.finding.target.blockIds, []);
 });
 
+test("finding with invalid source evidence block is rejected", async () => {
+  const target = await adapter.parse("data/demo/target/batch-record.md", "target");
+  const evidence = await adapter.parse("data/demo/target/batch-record.md", "evidence");
+  const finding = sampleFinding();
+  finding.evidenceSources = [{
+    documentId: evidence.documentId,
+    fileName: evidence.fileName,
+    blockIds: ["UNKNOWN-BLOCK"],
+    section: "Sheet: Results",
+    observedText: "Unsupported source citation"
+  }];
+  const [result] = validateFindings([finding], [sampleRule("approved")], target, [evidence]);
+  assert.equal(result?.finding.decision, "REJECTED");
+  assert.equal(result?.sensors.find((sensor) => sensor.sensor === "evidence-reference-check")?.status, "FAIL");
+});
+
 test("duplicate findings can be detected", async () => {
   const target = await adapter.parse("data/demo/target/batch-record.md", "target");
   const results = validateFindings([sampleFinding(), sampleFinding()], [sampleRule("approved")], target);
@@ -242,6 +309,35 @@ test("QC run rejects documents with accepted major findings", async () => {
   const result = await runQc(targetPath, new AcceptedFindingProvider(), scope);
   assert.equal(result.accepted.length, 1);
   assert.equal(result.finalDecision, "REJECT");
+});
+
+test("QC case run preserves supporting source evidence citations", async () => {
+  const root = ".tmp/qc-case/data/clients";
+  await fs.rm(".tmp/qc-case", { recursive: true, force: true });
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.normalizedDir, { recursive: true });
+  const targetPath = path.join(scope.normalizedDir, "target.md");
+  const evidencePath = path.join(scope.normalizedDir, "evidence.md");
+  await fs.writeFile(targetPath, "# Target\n\nDocument Number: BMR-001\n", "utf8");
+  await fs.writeFile(evidencePath, "# Workbook: Evidence.xlsx\n\nA1: Release metadata reviewed\n", "utf8");
+  const ruleset: Ruleset = {
+    rulesetId: "RULESET-SOP-DEMO-001",
+    sopDocumentId: "SOP-DEMO-001",
+    sopFileName: "document-control-sop.md",
+    title: "Rules",
+    status: "approved",
+    generatedAt: "now",
+    rules: [sampleRule("approved")]
+  };
+  await writeJson(path.join(scope.rulesetsApprovedDir, `${ruleset.rulesetId}.json`), ruleset);
+
+  const result = await runQcCase({ targetPath, evidenceMode: "explicit", evidencePaths: [evidencePath] }, new CaseFindingProvider(), scope);
+  const graph = await new GraphStore(scope.graphPath).load();
+  assert.equal(result.accepted.length, 1);
+  assert.equal(result.finalDecision, "REJECT");
+  assert.equal(result.accepted[0]?.evidenceSources?.[0]?.documentId, "EVIDENCE-EVIDENCE");
+  assert.ok(graph.nodes.some((node) => node.type === "SOURCE_DOCUMENT" && node.id === "EVIDENCE-EVIDENCE"));
+  assert.ok(graph.edges.some((edge) => edge.type === "SUPPORTED_BY_SOURCE" && edge.from === "QC-CASE-F-001"));
 });
 
 test("graph serialization and finding lineage resolve", async () => {
