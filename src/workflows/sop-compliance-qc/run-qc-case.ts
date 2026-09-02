@@ -21,6 +21,8 @@ import { writeTrace } from "../../harness/tracing/trace.js";
 import { findingsSchema } from "../../providers/structured-schemas.js";
 import { coerceFinding, qcFinalDecision } from "./run-qc.js";
 import { loadSopQcRuntimeConfig } from "./qc-config.js";
+import type { SopQcRuntimeConfig } from "./qc-config.js";
+import type { SopRule } from "../../harness/contracts/rule.js";
 
 export interface QcCaseRunOptions {
   targetPath: string;
@@ -118,6 +120,73 @@ function combinedDocument(target: NormalizedDocument, evidenceDocuments: Normali
   };
 }
 
+function terms(text: string): string[] {
+  return Array.from(new Set(text.toLowerCase().split(/[^a-z0-9_%.-]+/).filter((word) => word.length > 2)));
+}
+
+function ruleTerms(rules: SopRule[]): Set<string> {
+  return new Set(rules.flatMap((rule) => terms([
+    rule.ruleId,
+    rule.title,
+    rule.statement,
+    rule.description,
+    rule.source.section ?? "",
+    rule.source.sourceText,
+    JSON.stringify(rule.requirement)
+  ].join(" "))));
+}
+
+function scoreBlock(block: NormalizedBlock, words: Set<string>): number {
+  const blockTerms = terms([block.text, block.location.section ?? "", block.location.sheet ?? "", block.location.cellRange ?? ""].join(" "));
+  const hits = blockTerms.filter((word) => words.has(word)).length;
+  const structuralBoost = block.type === "heading" ? 0.15 : block.location.cellRange ? 0.1 : 0;
+  return hits + structuralBoost;
+}
+
+function compactDocument(document: NormalizedDocument, rules: SopRule[], maxBlocks: number, maxChars: number): NormalizedDocument {
+  const words = ruleTerms(rules);
+  const selected = new Map<string, NormalizedBlock>();
+  const ranked = document.blocks
+    .map((block, index) => ({ block, index, score: scoreBlock(block, words) }))
+    .sort((left, right) => right.score - left.score || left.index - right.index);
+
+  for (const item of ranked) {
+    if (selected.size >= maxBlocks) break;
+    if (item.score <= 0 && selected.size > 0) continue;
+    selected.set(item.block.blockId, item.block);
+    const previous = document.blocks[item.index - 1];
+    const next = document.blocks[item.index + 1];
+    if (previous?.type === "heading" && selected.size < maxBlocks) selected.set(previous.blockId, previous);
+    if (next && item.block.location.section === next.location.section && selected.size < maxBlocks) selected.set(next.blockId, next);
+  }
+
+  if (selected.size === 0) {
+    for (const block of document.blocks.slice(0, maxBlocks)) selected.set(block.blockId, block);
+  }
+
+  const blocks: NormalizedBlock[] = [];
+  let chars = 0;
+  for (const block of document.blocks) {
+    if (!selected.has(block.blockId)) continue;
+    const nextChars = chars + block.text.length;
+    if (blocks.length > 0 && nextChars > maxChars) continue;
+    blocks.push(block);
+    chars = nextChars;
+  }
+
+  return {
+    ...document,
+    blocks,
+    fullText: blocks.map((block) => block.text).join("\n")
+  };
+}
+
+function compactEvidenceDocuments(documents: NormalizedDocument[], rules: SopRule[], config: SopQcRuntimeConfig): NormalizedDocument[] {
+  return documents
+    .map((document) => compactDocument(document, rules, config.maxEvidenceBlocksPerDocumentPerQcRequest, config.maxCharsPerContextDocument))
+    .filter((document) => document.blocks.length > 0);
+}
+
 function evidenceBlocksForFinding(finding: QcFinding, evidenceDocuments: NormalizedDocument[]): NormalizedBlock[] {
   const blocksById = new Map(evidenceDocuments.flatMap((document) => document.blocks.map((block) => [block.blockId, block] as const)));
   return (finding.evidenceSources ?? []).flatMap((source) => source.blockIds.map((blockId) => blocksById.get(blockId)).filter((block): block is NormalizedBlock => Boolean(block)));
@@ -151,7 +220,17 @@ export async function runQcCase(options: QcCaseRunOptions, provider: AIProvider,
 
   const findings: QcFinding[] = [];
   const tokenUsage: Array<{ input?: number; output?: number }> = [];
+  const contextBatches: Array<{ batch: number; rules: number; targetBlocks: number; evidenceDocuments: number; evidenceBlocks: number }> = [];
   for (const [batchIndex, rules] of batches.entries()) {
+    const contextTarget = compactDocument(target, rules, config.maxTargetBlocksPerQcRequest, config.maxCharsPerContextDocument);
+    const contextEvidenceDocuments = compactEvidenceDocuments(evidenceDocuments, rules, config);
+    contextBatches.push({
+      batch: batchIndex + 1,
+      rules: rules.length,
+      targetBlocks: contextTarget.blocks.length,
+      evidenceDocuments: contextEvidenceDocuments.length,
+      evidenceBlocks: contextEvidenceDocuments.reduce((sum, document) => sum + document.blocks.length, 0)
+    });
     const response = await provider.generateStructured<FindingCandidateResponse>({
       runId: `${runId}-B${String(batchIndex + 1).padStart(3, "0")}`,
       guideId: "sop-compliance-qc-case",
@@ -171,8 +250,8 @@ export async function runQcCase(options: QcCaseRunOptions, provider: AIProvider,
       ].join(" "),
       prompt: JSON.stringify({
         instruction: "Use exact IDs from the supplied JSON. Do not invent IDs. Prefer fewer high-confidence findings over broad unsupported findings.",
-        targetDocument: target,
-        supportingSourceDocuments: evidenceDocuments,
+        targetDocument: contextTarget,
+        supportingSourceDocuments: contextEvidenceDocuments,
         approvedRules: rules
       })
     });
@@ -232,6 +311,7 @@ export async function runQcCase(options: QcCaseRunOptions, provider: AIProvider,
     approvedRulesLoaded: approvedRules.length,
     rulesRetrieved: retrieved.length,
     ruleBatches: batches.length,
+    contextBatches,
     candidateFindings: findings.length,
     acceptedFindings: accepted.length,
     humanReviewFindings: humanReview.length,

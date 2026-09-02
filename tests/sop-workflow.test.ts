@@ -121,6 +121,20 @@ class CaseFindingProvider implements AIProvider {
   }
 }
 
+class PromptCaptureProvider implements AIProvider {
+  readonly name = "prompt-capture";
+  readonly model = "prompt-capture-test";
+  prompts: string[] = [];
+
+  async generateStructured<T>(request: StructuredGenerationRequest): Promise<StructuredGenerationResult<T>> {
+    this.prompts.push(request.prompt);
+    const parsed = request.schemaName === "finding-grounding"
+      ? { supported: true, ruleAppliedCorrectly: true, targetEvidenceSupportsFinding: true, contradictions: [], score: 0.95, reason: "supported" }
+      : { findings: [] };
+    return { provider: this.name, model: this.model, rawText: JSON.stringify(parsed), parsed: parsed as T, latencyMs: 0 };
+  }
+}
+
 function sampleRule(status: SopRule["status"] = "pending_approval"): SopRule {
   return {
     ruleId: "SOP-DEMO-001-R004",
@@ -338,6 +352,34 @@ test("QC case run preserves supporting source evidence citations", async () => {
   assert.equal(result.accepted[0]?.evidenceSources?.[0]?.documentId, "EVIDENCE-EVIDENCE");
   assert.ok(graph.nodes.some((node) => node.type === "SOURCE_DOCUMENT" && node.id === "EVIDENCE-EVIDENCE"));
   assert.ok(graph.edges.some((edge) => edge.type === "SUPPORTED_BY_SOURCE" && edge.from === "QC-CASE-F-001"));
+});
+
+test("QC case run compacts oversized target and evidence prompts", async () => {
+  const root = ".tmp/qc-case-compact/data/clients";
+  await fs.rm(".tmp/qc-case-compact", { recursive: true, force: true });
+  const scope = resolveClientScope("alpha", root);
+  await fs.mkdir(scope.normalizedDir, { recursive: true });
+  const targetPath = path.join(scope.normalizedDir, "target.md");
+  const evidencePath = path.join(scope.normalizedDir, "evidence.md");
+  const noisyBlocks = Array.from({ length: 200 }, (_, index) => `Noise paragraph ${index} unrelated content`).join("\n\n");
+  await fs.writeFile(targetPath, `# Target\n\n${noisyBlocks}\n\nEffective date missing from release packet\n`, "utf8");
+  await fs.writeFile(evidencePath, `# Workbook: Evidence.xlsx\n\n${noisyBlocks}\n\nD12: Effective date missing\n`, "utf8");
+  const ruleset: Ruleset = {
+    rulesetId: "RULESET-SOP-DEMO-001",
+    sopDocumentId: "SOP-DEMO-001",
+    sopFileName: "document-control-sop.md",
+    title: "Rules",
+    status: "approved",
+    generatedAt: "now",
+    rules: [sampleRule("approved")]
+  };
+  await writeJson(path.join(scope.rulesetsApprovedDir, `${ruleset.rulesetId}.json`), ruleset);
+  const provider = new PromptCaptureProvider();
+
+  await runQcCase({ targetPath, evidenceMode: "explicit", evidencePaths: [evidencePath] }, provider, scope);
+  const prompt = JSON.parse(provider.prompts.find((candidate) => candidate.includes("targetDocument")) ?? "{}");
+  assert.ok(prompt.targetDocument.blocks.length < 200);
+  assert.ok(prompt.supportingSourceDocuments[0].blocks.length < 200);
 });
 
 test("graph serialization and finding lineage resolve", async () => {

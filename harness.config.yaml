@@ -77,7 +77,10 @@ workflows:
     retrieval:
       strategy: simple
     limits:
-      maxRulesPerQcRequest: 100
+      maxRulesPerQcRequest: 10
+      maxTargetBlocksPerQcRequest: 120
+      maxEvidenceBlocksPerDocumentPerQcRequest: 80
+      maxCharsPerContextDocument: 30000
       maxAttempts: 2
     output:
       clientReport: true

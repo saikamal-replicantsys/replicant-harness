@@ -3,7 +3,17 @@ import YAML from "yaml";
 
 export interface SopQcRuntimeConfig {
   maxRulesPerQcRequest: number;
+  maxTargetBlocksPerQcRequest: number;
+  maxEvidenceBlocksPerDocumentPerQcRequest: number;
+  maxCharsPerContextDocument: number;
 }
+
+const defaults: SopQcRuntimeConfig = {
+  maxRulesPerQcRequest: 10,
+  maxTargetBlocksPerQcRequest: 120,
+  maxEvidenceBlocksPerDocumentPerQcRequest: 80,
+  maxCharsPerContextDocument: 30000
+};
 
 export async function loadSopQcRuntimeConfig(configPath = "harness.config.yaml"): Promise<SopQcRuntimeConfig> {
   try {
@@ -12,15 +22,22 @@ export async function loadSopQcRuntimeConfig(configPath = "harness.config.yaml")
         sopComplianceQc?: {
           limits?: {
             maxRulesPerQcRequest?: number;
+            maxTargetBlocksPerQcRequest?: number;
+            maxEvidenceBlocksPerDocumentPerQcRequest?: number;
+            maxCharsPerContextDocument?: number;
           };
         };
       };
     };
-    const configured = parsed.workflows?.sopComplianceQc?.limits?.maxRulesPerQcRequest;
+    const limits = parsed.workflows?.sopComplianceQc?.limits;
+    const positive = (value: unknown, fallback: number) => typeof value === "number" && value > 0 ? value : fallback;
     return {
-      maxRulesPerQcRequest: typeof configured === "number" && configured > 0 ? configured : 25
+      maxRulesPerQcRequest: positive(limits?.maxRulesPerQcRequest, defaults.maxRulesPerQcRequest),
+      maxTargetBlocksPerQcRequest: positive(limits?.maxTargetBlocksPerQcRequest, defaults.maxTargetBlocksPerQcRequest),
+      maxEvidenceBlocksPerDocumentPerQcRequest: positive(limits?.maxEvidenceBlocksPerDocumentPerQcRequest, defaults.maxEvidenceBlocksPerDocumentPerQcRequest),
+      maxCharsPerContextDocument: positive(limits?.maxCharsPerContextDocument, defaults.maxCharsPerContextDocument)
     };
   } catch {
-    return { maxRulesPerQcRequest: 25 };
+    return defaults;
   }
 }
